@@ -164,6 +164,44 @@ All submodules are pinned to 2022-era commits and are significantly outdated.
 
 **Recommendation:** Replace with `NSJSONSerialization` (built into Foundation since macOS 10.7).
 
+### 3.11 NSCalendarDate (MEDIUM)
+
+**Status:** Deprecated since macOS 10.10. Suppressed with `#pragma clang diagnostic` in multiple files.
+
+**Files:**
+- `Horos.m` (lines 38-106, multiple pragma suppression blocks)
+- `DCM Framework/DCMCalendarDate.m`
+- `Nitrogen/Sources/NSDate+N2.mm`
+
+**Recommendation:** Migrate to `NSDateComponents` / `NSCalendar` / `DateFormatter`.
+
+### 3.12 Carbon FSRef / Gestalt APIs (HIGH)
+
+**Status:** Legacy Carbon file system and system version APIs.
+
+**Files:**
+- `AppController.m` — `Gestalt()` for macOS version detection, `FSRef` / `FSRefMakePath()`
+- `BrowserController+Sources.m` — `FSPathMakeRef()`
+- `VRViewVPRO.mm` — `FSRef` usage
+
+**Recommendation:** Replace `Gestalt()` with `NSProcessInfo.processInfo.operatingSystemVersion`. Replace `FSRef` with `NSURL`-based file APIs.
+
+### 3.13 Deprecated Security APIs (MEDIUM)
+
+**Files:**
+- `cocoahttpserver/DDKeychain.m` — `SecPolicySearchCreate()`, `SecPolicySearchCopyNext()` (1,200 lines of pragma-suppressed code)
+- `CSMailMailClient.m` — `SecKeychainFindGenericPassword()`
+
+**Recommendation:** Migrate to modern Security framework APIs (`SecKey`, `SecPolicy`).
+
+### 3.14 NSPropertyListSerialization Deprecated Methods (LOW)
+
+**Status:** Using `propertyListFromData:mutabilityOption:format:errorDescription:` (deprecated).
+
+**Files:** `BrowserController.m`, `ViewerController.m`, `AppController.m`, `BonjourPublisher.m`, `DicomDatabase.mm`, `SRAnnotation.mm`
+
+**Recommendation:** Use `propertyListWithData:options:format:error:` instead.
+
 ---
 
 ## 4. Build System & Toolchain
@@ -243,6 +281,11 @@ All submodules are pinned to 2022-era commits and are significantly outdated.
 - [ ] Replace AddressBook with Contacts framework
 - [ ] Replace SBJSON with `NSJSONSerialization`
 - [ ] Complete QTKit to AVFoundation migration
+- [ ] Replace `Gestalt()` with `NSProcessInfo` version detection
+- [ ] Replace `FSRef` with `NSURL`-based file APIs
+- [ ] Migrate `NSCalendarDate` to `NSDateComponents`/`NSCalendar`
+- [ ] Update deprecated `NSPropertyListSerialization` calls
+- [ ] Modernize `cocoahttpserver/DDKeychain.m` Security APIs
 - [ ] Clean up `stringWithCString:` and `finalize` dead code
 - [ ] Remove legacy `cocoahttpserver` ppc/i386 configuration
 
