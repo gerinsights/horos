@@ -32,19 +32,19 @@ This document identifies updates needed to bring Horos in line with current-gene
 
 ## 2. Third-Party Dependencies (Submodules)
 
-All submodules are pinned to 2022-era commits and are significantly outdated.
+All submodules are pinned to commits from 2016–2022 and are significantly outdated.
 
-| Library | Pinned Version (approx.) | Latest Stable | Priority | Notes |
-|---------|-------------------------|---------------|----------|-------|
-| **OpenSSL** | ~3.0.x (2022) | **3.6.1** (Jan 2026) | **CRITICAL** | Security library; 3.0 LTS EOL Sep 2026. Contains known CVE fixes. |
-| **DCMTK** | ~3.6.7 (2022) | **3.7.0** (Dec 2025) | **HIGH** | Core DICOM toolkit; includes DICOM standard updates and bug fixes. |
-| **VTK** | ~9.1.x (2022) | **9.6.0** (Feb 2026) | **HIGH** | Visualization toolkit; major Metal rendering improvements in 9.4+. |
-| **ITK** | ~5.2.x (2022) | **5.4.5** / 6.0 beta | **HIGH** | Image analysis; ITK 6 requires C++17, deprecates Intel macOS. |
-| **GDCM** | ~3.0.x (2022) | **3.2.2** | **MEDIUM** | DICOM library; includes security fixes (CISA advisory for OOB write). |
-| **OpenJPEG** | ~2.5.0 (2022) | **2.5.4** (Sep 2025) | **MEDIUM** | JPEG 2000; bugfix releases with stability improvements. |
-| **CharLS** | ~2.3.x (2022) | **2.4.x+** | **MEDIUM** | JPEG-LS codec; now requires C++17. |
-| **Grok** | 2022 snapshot | Latest | **LOW** | JPEG 2000 compression. |
-| **FeedbackReporter** | 2022 snapshot | Unmaintained | **LOW** | Consider replacing or removing. |
+| Library | Pinned Version | Pinned Date | Latest Stable | Priority | Notes |
+|---------|---------------|-------------|---------------|----------|-------|
+| **OpenSSL** | 3.0.4–3.0.5 | Jul 2022 | **3.6.1** (Jan 2026) | **CRITICAL** | Security library; 3.0 LTS EOL Sep 2026. Many CVE fixes missed. |
+| **VTK** | **8.2.0** | Jan 2019 | **9.6.0** (Feb 2026) | **CRITICAL** | 7 years behind; Metal rendering support added in 9.4+. Major API changes from 8→9. |
+| **DCMTK** | ~3.6.7 | Apr 2022 | **3.7.0** (Dec 2025) | **HIGH** | Core DICOM toolkit; includes DICOM standard updates and bug fixes. |
+| **ITK** | ~5.2.1 | ~2022 | **5.4.5** / 6.0 beta | **HIGH** | Image analysis; ITK 6 requires C++17, deprecates Intel macOS. |
+| **Grok** | Untagged early commit | Jan 2018 | **20.0.5** (Jan 2026) | **HIGH** | 8 years behind; massive version gap. Evaluate if still needed alongside OpenJPEG. |
+| **GDCM** | Untagged ~3.0.x | Jun 2022 | **3.2.2** (Sep 2025) | **MEDIUM** | DICOM library; includes security fixes (CISA advisory for OOB write). |
+| **OpenJPEG** | ~2.5.0 | Jun 2022 | **2.5.4** (Sep 2025) | **MEDIUM** | JPEG 2000; bugfix releases with stability improvements. |
+| **CharLS** | **2.0.0** | May 2016 | **2.4.3** (Mar 2026) | **MEDIUM** | JPEG-LS codec; 10 years behind. Now requires C++17. |
+| **FeedbackReporter** | Post-1.3.0 (untagged) | Nov 2019 | 1.3.0 (last tag, 2010) | **LOW** | Effectively unmaintained. Consider replacing or removing. |
 
 **Recommended approach:**
 1. Update OpenSSL first (security-critical)
