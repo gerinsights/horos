@@ -166,17 +166,35 @@ PIPELINE_MRI = """
 SECURITY = """
 # Security Architecture — FIPS 140 Level 1
 
-## Cryptographic Policy
-- **OpenSSL 3.x FIPS provider** activated in all Python/Orthanc containers
-- Config: `config/openssl-fips.cnf` sets `fips=yes` as default property
-- All TLS uses FIPS-approved algorithms only
+## FIPS 140 Level 1 Requirements (software-only)
+- Use a CMVP-validated cryptographic module (OpenSSL 3.x FIPS provider, CMVP #4282/#4811)
+- FIPS-approved algorithms only: AES, SHA-2/SHA-3, ECDSA, RSA 2048+, ECDH P-256+
+- Disallowed: MD5, SHA-1 for signatures, 3DES, ChaCha20-Poly1305, Blake3, RC4
+- Self-tests: power-up integrity check + known-answer tests (handled by `openssl fipsinstall`)
+- Approved RNG: SP 800-90A compliant (OpenSSL DRBG)
+
+## Cryptographic Module Boundary
+- **AI Service**: OpenSSL 3.x FIPS provider via `OPENSSL_CONF` + `fipsinstall`
+  - `cryptography` pip package built from source against system FIPS OpenSSL
+  - Vendored OpenSSL in pip wheels is bypassed via `--no-binary cryptography`
+- **Orthanc**: Same FIPS provider config mounted + env vars set
+  - DCMTK delegates all crypto to OpenSSL — FIPS mode propagates automatically
+- **Caddy gateway**: Go stdlib TLS (not CMVP-validated)
+  - NOTE: For full FIPS validation, replace with NGINX + FIPS OpenSSL
+- **Ollama**: HTTP-only, internal network — inside FIPS boundary, no crypto needed
 
 ## TLS Configuration
 - **Minimum protocol**: TLS 1.2
-- **Cipher suites**: ECDHE+AESGCM only (AES-128-GCM, AES-256-GCM)
-- **Key exchange**: ECDHE with P-256, P-384, or X25519
+- **TLS 1.3 suites**: TLS_AES_256_GCM_SHA384, TLS_AES_128_GCM_SHA256
+- **TLS 1.2 suites**: ECDHE_RSA/ECDSA_WITH_AES_{128,256}_GCM_SHA{256,384}
+- **Key exchange**: ECDHE with P-256, P-384 only (x25519 removed for strict FIPS)
 - **Certificates**: ECDSA P-384 + SHA-384 (generated via `scripts/generate_certs.sh`)
-- **No**: MD5, SHA-1, RC4, DES, 3DES, RSA key exchange
+- **Disallowed**: MD5, SHA-1, RC4, DES, 3DES, NULL, EXPORT, static RSA key exchange
+
+## DICOM TLS (Supplement 230 / BCP 195 Profile B.12)
+- Orthanc: `DicomTlsEnabled: true` with FIPS certs
+- Compatible with DICOM B.12 profile (ECDHE+AES-GCM is a subset of FIPS-approved)
+- Standard port: 2762 (dicom-tls), configurable via DICOM_PORT env var
 
 ## Network Segmentation (Docker)
 - **internal** network: service-to-service only (no external access)
@@ -189,16 +207,18 @@ SECURITY = """
 - Non-root user (`aiuser`) in AI service
 - `read_only: true` where possible
 - `no-new-privileges` security option
-- Health checks on all services
+- Health checks on all services with dependency ordering
 - Secrets via environment variables (not baked into images)
+- Model checksums: SHA-256 only (no MD5/Blake3)
 
-## DICOM TLS
-- Orthanc configured with `DicomTlsEnabled: true`
-- Certificates: ECDSA P-384 (same CA as REST TLS)
-- Horos supports TLS via DCMTK (configurable in Preference Panes)
+## Known Gaps (documented, not blockers for Level 1)
+- Caddy uses Go stdlib crypto (not CMVP-validated) — replace with NGINX+FIPS for full validation
+- Ollama (Go) has no TLS — mitigated by internal-only Docker network
+- `python:3.12-slim` base may not have FIPS .so — fallback to UBI 9 for production
+- PyTorch/ROCm compute kernels are not cryptographic — no FIPS relevance
 
 ## What FIPS 140 Level 1 Does NOT Require
-- Physical security of the module (that's Level 2+)
+- Physical security of the module (Level 2+)
 - Tamper-evident seals (Level 2+)
 - Identity-based authentication (Level 3+)
 - Environmental protection (Level 4)

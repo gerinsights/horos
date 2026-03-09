@@ -11,16 +11,28 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     curl \
     openssl \
+    libssl-dev \
     libssl3 \
+    libffi-dev \
+    pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
-# Verify OpenSSL 3.x FIPS provider is available
-RUN openssl list -providers 2>/dev/null || true && \
-    test -f /usr/lib/x86_64-linux-gnu/ossl-modules/fips.so && \
-    echo "FIPS provider available" || echo "FIPS provider not found — will use config fallback"
+# Run fipsinstall to generate the FIPS module config
+# This creates fipsmodule.cnf with the HMAC of the FIPS provider .so
+RUN if [ -f /usr/lib/x86_64-linux-gnu/ossl-modules/fips.so ]; then \
+        openssl fipsinstall \
+            -out /etc/ssl/fipsmodule.cnf \
+            -module /usr/lib/x86_64-linux-gnu/ossl-modules/fips.so && \
+        echo "FIPS provider installed successfully"; \
+    else \
+        echo "FIPS provider .so not found — FIPS will be best-effort"; \
+    fi
 
+# Build cryptography from source against system FIPS OpenSSL
+# (pip wheel bundles its own non-FIPS OpenSSL)
 COPY pyproject.toml .
-RUN pip install --no-cache-dir .
+RUN pip install --no-cache-dir --no-binary cryptography . && \
+    python -c "import ssl; print('SSL version:', ssl.OPENSSL_VERSION)"
 
 # ---------- rocm ----------
 FROM base AS backend-rocm

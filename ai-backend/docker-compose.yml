@@ -13,9 +13,12 @@ services:
       - orthanc-data:/var/lib/orthanc/db
       - ./config/orthanc.json:/etc/orthanc/orthanc.json:ro
       - ./config/orthanc-routing.lua:/etc/orthanc/lua/orthanc-routing.lua:ro
+      - ./config/openssl-fips.cnf:/etc/orthanc/openssl-fips.cnf:ro
       - ./certs:/etc/orthanc/certs:ro
     environment:
       - ORTHANC__NAME=AI_SEGMENT
+      - OPENSSL_CONF=/etc/orthanc/openssl-fips.cnf
+      - OPENSSL_MODULES=/usr/lib/x86_64-linux-gnu/ossl-modules
     healthcheck:
       test: ["CMD", "curl", "-fsk", "http://localhost:8042/system"]
       interval: 30s

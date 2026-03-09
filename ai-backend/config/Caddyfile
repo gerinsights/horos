@@ -14,7 +14,7 @@
 	tls /etc/caddy/certs/server.crt /etc/caddy/certs/server.key {
 		protocols tls1.2 tls1.3
 		ciphers TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
-		curves x25519 secp384r1 secp256r1
+		curves secp384r1 secp256r1
 	}
 
 	# AI service API
