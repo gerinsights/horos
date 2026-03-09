@@ -1,0 +1,35 @@
+services:
+  orthanc:
+    image: orthancteam/orthanc:24.12.1
+    ports:
+      - "4242:4242"   # DICOM
+      - "8042:8042"   # REST API
+    volumes:
+      - orthanc-data:/var/lib/orthanc/db
+      - ./config/orthanc.json:/etc/orthanc/orthanc.json:ro
+      - ./config/orthanc-routing.lua:/etc/orthanc/lua/orthanc-routing.lua:ro
+    restart: unless-stopped
+
+  ai-service:
+    build:
+      context: .
+      args:
+        GPU_BACKEND: ${GPU_BACKEND:-rocm}
+    ports:
+      - "8000:8000"   # FastAPI
+      - "3001:3001"   # MCP SSE server
+    volumes:
+      - ./models:/app/models
+      - ./config:/app/config:ro
+    depends_on:
+      - orthanc
+    environment:
+      - ORTHANC_URL=http://orthanc:8042
+      - PACS_CORE_AE=${PACS_CORE_AE:-PACS_CORE}
+      - PACS_CORE_HOST=${PACS_CORE_HOST:-localhost}
+      - PACS_CORE_PORT=${PACS_CORE_PORT:-4242}
+      - CONFIG_PATH=/app/config/settings.yaml
+    restart: unless-stopped
+
+volumes:
+  orthanc-data:

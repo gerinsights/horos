@@ -1,0 +1,13 @@
+# ROCm GPU passthrough for AMD RX 7600 XT (RDNA 3, gfx1102)
+# This file is automatically loaded by docker compose alongside docker-compose.yml.
+# For CUDA or CPU, replace or remove this file.
+services:
+  ai-service:
+    devices:
+      - /dev/kfd
+      - /dev/dri
+    group_add:
+      - video
+      - render
+    environment:
+      - HSA_OVERRIDE_GFX_VERSION=11.0.2

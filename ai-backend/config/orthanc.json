@@ -1,0 +1,29 @@
+{
+  "Name": "AI_SEGMENT",
+  "DicomAet": "AI_SEGMENT",
+  "DicomPort": 4242,
+  "HttpPort": 8042,
+
+  "RemoteAccessAllowed": true,
+  "AuthenticationEnabled": false,
+
+  "StableAge": 10,
+
+  "DicomModalities": {
+    "PACS_CORE": ["PACS_CORE", "localhost", 4242],
+    "HOROS_M1": ["HOROS_M1", "localhost", 11112]
+  },
+
+  "LuaScripts": ["/etc/orthanc/lua/orthanc-routing.lua"],
+
+  "StorageDirectory": "/var/lib/orthanc/db",
+  "IndexDirectory": "/var/lib/orthanc/db",
+
+  "MaximumStorageSize": 0,
+  "MaximumPatientCount": 0,
+
+  "DicomCheckCalledAet": false,
+  "UnknownSopClassAccepted": true,
+
+  "ConcurrentJobs": 2
+}
