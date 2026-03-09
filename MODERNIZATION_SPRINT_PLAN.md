@@ -159,13 +159,13 @@ CoreData (DicomStudy/Series/Image)
 - [ ] Requires C++17 (done in Sprint 0)
 - [ ] Test: JPEG-LS DICOM decode
 
-#### 2.4 Evaluate Grok (untagged 2018 → 20.0.5)
-- [ ] **Decision point**: Grok has an 8-year version gap. Options:
-  - A) Update to 20.0.5 (may require significant API migration)
-  - B) Remove Grok entirely and rely on OpenJPEG for JPEG 2000
-  - C) Pin to a known-good intermediate version
-- [ ] If keeping: update submodule and CMake script
-- [ ] Test: JPEG 2000 Part 2 (HTJ2K) if applicable
+#### 2.4 Remove Grok submodule
+- [ ] **DECIDED: Remove Grok entirely, consolidate on OpenJPEG for JPEG 2000**
+- [ ] `git submodule deinit Grok && git rm Grok`
+- [ ] Remove `Horos/Scripts/Grok/` CMake scripts
+- [ ] Remove Grok references from Xcode project build phases
+- [ ] Update any code that conditionally uses Grok vs OpenJPEG to use OpenJPEG exclusively
+- [ ] Test: JPEG 2000 decode/encode with OpenJPEG only
 
 #### 2.5 Evaluate FeedbackReporter
 - [ ] Repository effectively unmaintained (last tag 2010)
@@ -197,7 +197,8 @@ CoreData (DicomStudy/Series/Image)
   - C++17 requirement for VTK 9.4+
 
 #### 3.2 Update VTK submodule and build
-- [ ] Update submodule pointer to v9.4.x (latest with Metal support) or v9.6.0
+- [ ] **DECIDED: Target VTK v9.6.0** (latest, future-proof)
+- [ ] Update submodule pointer to v9.6.0
 - [ ] Rewrite `Horos/Scripts/VTK/CMake.sh`:
   - Enable Metal rendering backend: `-DVTK_DEFAULT_RENDER_WINDOW_OFFSCREEN=OFF`
   - Set module selections appropriate for medical imaging
@@ -430,7 +431,8 @@ Two viable approaches:
 - [ ] The biggest breaking change: plugins that use OpenGL directly will break
 - [ ] Provide a Metal-based rendering context for plugins:
   - New protocol method: `drawInMetalView:encoder:` (optional, alongside legacy `drawInOpenGLView:`)
-  - During transition: provide a compatibility shim if feasible, or require plugin updates
+  - **DECIDED: Hard break** — no compatibility shim. Plugins must adopt Metal rendering.
+  - Rewrite gerinsights/horosplugins plugins. Contribute upstream patches where possible.
 - [ ] Update `PluginFilter.h` protocol:
   - Add `@optional` Metal rendering methods
   - Add `@optional` modern toolbar API methods (NSToolbarItemGroup)
@@ -544,8 +546,8 @@ Sprint 0 (Build System)
 | VTK 8→9 breaks 3D rendering pipeline | HIGH | HIGH | Budget extra time; VTK 9 migration guides exist. Consider intermediate step to 9.2 then 9.6. |
 | OpenGL→Metal introduces visual regressions | HIGH | MEDIUM | Create screenshot comparison test suite before migration. Test every ROI type, every view mode. |
 | CharLS 2.0→2.4 API incompatibility | MEDIUM | MEDIUM | If problematic, use GDCM's built-in CharLS for JPEG-LS decode instead. |
-| Grok 2018→2026 migration infeasible | MEDIUM | HIGH | Fall back to OpenJPEG exclusively for JPEG 2000. |
-| Plugin ecosystem breaks | MEDIUM | HIGH | Provide compatibility shim for one release cycle. Document migration path clearly. |
+| Grok removal breaks JPEG 2000 edge cases | LOW | LOW | OpenJPEG is the standard JPEG 2000 library; Grok was redundant. Test thoroughly. |
+| Plugin ecosystem breaks (hard break) | MEDIUM | CERTAIN | Accepted risk. Rewrite all gerinsights/horosplugins. Provide PLUGIN_MIGRATION_GUIDE.md. |
 | ViewerController.m (22K lines) refactoring | MEDIUM | LOW | Don't refactor — only change rendering calls. Keep surgical. |
 | DCMTK 3.7 network protocol changes | MEDIUM | LOW | DCMTK maintains strong backward compatibility. Test with known PACS systems. |
 | Metal shader development time underestimated | HIGH | MEDIUM | Start with simplest possible shaders (textured quad + W/L). Add features incrementally. |
@@ -589,12 +591,18 @@ Based on the plugin architecture analysis, plugins loaded via NSBundle will face
 
 ## Decision Log
 
-Decisions to be made during execution:
+### Decided
+
+| # | Decision | Choice | Rationale |
+|---|----------|--------|-----------|
+| 1 | Grok — update, remove, or replace? | **Remove** | Consolidate on OpenJPEG for JPEG 2000. 8-year gap makes update impractical. |
+| 2 | VTK target version | **9.6.0** (latest) | Future-proof; skip intermediate versions. |
+| 3 | Plugin backward compatibility | **Hard break** | Rewrite plugins with future-proof architecture. Contribute upstream patches to horosproject/horosplugins where possible. |
+| 4 | Fork stance | **Forward-only** | Not backport-capable to horosproject/horos. Maintainable as independent fork. |
+
+### To Be Decided
 
 1. **Sprint 0:** Final deployment target — macOS 14.0 (Sonoma) vs 15.0 (Sequoia)?
-2. **Sprint 2:** Grok — update, remove, or replace?
-3. **Sprint 2:** FeedbackReporter — remove, fork, or replace?
-4. **Sprint 3:** VTK target version — 9.4.x (proven Metal) vs 9.6.0 (latest)?
-5. **Sprint 4:** Metal rendering approach — custom MTKView vs CAMetalLayer?
-6. **Sprint 8:** Plugin backward compatibility — provide shim or hard break?
-7. **Sprint 9:** Version numbering — continue Horos 4.x or jump to 5.0?
+2. **Sprint 2:** FeedbackReporter — remove, fork, or replace?
+3. **Sprint 4:** Metal rendering approach — custom MTKView vs CAMetalLayer?
+4. **Sprint 9:** Version numbering — continue Horos 4.x or jump to 5.0?
