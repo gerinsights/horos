@@ -352,11 +352,11 @@ NSString* const SessionDicomCStorePortKey = @"DicomCStorePort"; // NSNumber (int
 - (NSArray *)sslIdentityAndCertificates
 {
 //	NSArray *result = [DDKeychain SSLIdentityAndCertificates];
-	id identity = (id)[DDKeychain KeychainAccessPreferredIdentityForName:@"org.horosproject.horoswebserver" keyUse:CSSM_KEYUSE_ANY];
+	id identity = (id)[DDKeychain KeychainAccessPreferredIdentityForName:@"org.horosproject.horoswebserver" keyUse:0];
 	if (identity == nil)
 	{
 		[DDKeychain createNewIdentity];
-		identity = (id)[DDKeychain KeychainAccessPreferredIdentityForName:@"org.horosproject.horoswebserver" keyUse:CSSM_KEYUSE_ANY];
+		identity = (id)[DDKeychain KeychainAccessPreferredIdentityForName:@"org.horosproject.horoswebserver" keyUse:0];
 	}
 	
 	NSMutableArray *array = [NSMutableArray arrayWithObject:identity];
