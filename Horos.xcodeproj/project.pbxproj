@@ -122,19 +122,7 @@
 			name = Submodules;
 			productName = "Git Submodule Sync";
 		};
-		9920CBEC202A0BA600FE0A2A /* Grok */ = {
-			isa = PBXAggregateTarget;
-			buildConfigurationList = 9920CBF1202A0BA600FE0A2A /* Build configuration list for PBXAggregateTarget "Grok" */;
-			buildPhases = (
-				9920CBEF202A0BA600FE0A2A /* CMake */,
-				9920CBF0202A0BA600FE0A2A /* Make */,
-			);
-			dependencies = (
-				9920CBED202A0BA600FE0A2A /* PBXTargetDependency */,
-			);
-			name = Grok;
-			productName = Grok;
-		};
+
 		BF7486A50CC6AA5C00198387 /* Documentation */ = {
 			isa = PBXAggregateTarget;
 			buildConfigurationList = BF7486AA0CC6AA7C00198387 /* Build configuration list for PBXAggregateTarget "Documentation" */;
@@ -144,18 +132,7 @@
 			name = Documentation;
 			productName = Documentation;
 		};
-		F35B0D7C289535B6008ABE3E /* FeedbackReporter */ = {
-			isa = PBXAggregateTarget;
-			buildConfigurationList = F35B0D85289535B6008ABE3E /* Build configuration list for PBXAggregateTarget "FeedbackReporter" */;
-			buildPhases = (
-				F35B0D84289535B6008ABE3E /* Make */,
-			);
-			dependencies = (
-				F35B0D7D289535B6008ABE3E /* PBXTargetDependency */,
-			);
-			name = FeedbackReporter;
-			productName = FeedbackReporter;
-		};
+
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
@@ -3027,8 +3004,6 @@
 		DB5961390CAB447B00809190 /* OSIVoxel.m in Sources */ = {isa = PBXBuildFile; fileRef = DB5961370CAB447B00809190 /* OSIVoxel.m */; };
 		EC9BD81C11EDF349007421B2 /* FlyAssistant.h in Headers */ = {isa = PBXBuildFile; fileRef = EC9BD81A11EDF349007421B2 /* FlyAssistant.h */; };
 		EC9BD81D11EDF349007421B2 /* FlyAssistant.mm in Sources */ = {isa = PBXBuildFile; fileRef = EC9BD81B11EDF349007421B2 /* FlyAssistant.mm */; };
-		F35B0D8F28954862008ABE3E /* FeedbackReporter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F35B0D8E28954830008ABE3E /* FeedbackReporter.framework */; };
-		F35B0D9028954862008ABE3E /* FeedbackReporter.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = F35B0D8E28954830008ABE3E /* FeedbackReporter.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		F3E3E6CD289527220037A247 /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F3E3E6CA289527220037A247 /* UserNotifications.framework */; };
 /* End PBXBuildFile section */
 
@@ -3215,33 +3190,12 @@
 			remoteGlobalIDString = AB724F300ADE6ECB00A212A0;
 			remoteInfo = Decompress;
 		};
-		9920CBEE202A0BA600FE0A2A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 71E6C0B01FBAD31E00FF75B6;
-			remoteInfo = Submodules;
-		};
 		9937E81A24363D3700768B14 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 71A5232A2021D3420065793A;
 			remoteInfo = OpenSSL;
-		};
-		99C0EE1A202A101000D88E8D /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 9920CBEC202A0BA600FE0A2A;
-			remoteInfo = Grok;
-		};
-		99C0EE1C202A102600D88E8D /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 9920CBEC202A0BA600FE0A2A;
-			remoteInfo = Grok;
 		};
 		99C0EE20202A63EA00D88E8D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -3263,20 +3217,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = 4A2F5931078D148300C514A2;
 			remoteInfo = "Unzip Binaries";
-		};
-		F35B0D7E289535B6008ABE3E /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 71E6C0B01FBAD31E00FF75B6;
-			remoteInfo = Submodules;
-		};
-		F35B0D8828953DE9008ABE3E /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = F35B0D7C289535B6008ABE3E;
-			remoteInfo = FeedbackReporter;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -3311,7 +3251,6 @@
 			dstPath = "";
 			dstSubfolder = Frameworks;
 			files = (
-				F35B0D9028954862008ABE3E /* FeedbackReporter.framework in Copy Frameworks */,
 				992264FB2028CE79004C4995 /* homephone.framework in Copy Frameworks */,
 				992335892009A75A000E10BA /* Horos.framework in Copy Frameworks */,
 				71E6C0AF1FB5B0BF00FF75B6 /* 3DconnexionClient.framework in Copy Frameworks */,
@@ -5664,7 +5603,6 @@
 		DB5961370CAB447B00809190 /* OSIVoxel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OSIVoxel.m; sourceTree = "<group>"; };
 		EC9BD81A11EDF349007421B2 /* FlyAssistant.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FlyAssistant.h; sourceTree = "<group>"; };
 		EC9BD81B11EDF349007421B2 /* FlyAssistant.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = FlyAssistant.mm; sourceTree = "<group>"; };
-		F35B0D8E28954830008ABE3E /* FeedbackReporter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FeedbackReporter.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F3A24302289570ED00E2547B /* Changelog.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = Changelog.md; sourceTree = "<group>"; };
 		F3C3F0702893A429004B2F61 /* Horos.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Horos.xcconfig; path = Horos/Horos.xcconfig; sourceTree = "<group>"; };
 		F3D78C9D2892994600148FE5 /* Config.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
@@ -5702,7 +5640,6 @@
 				AB28B93305B79D5B00A9906C /* Cocoa.framework in Frameworks */,
 				AB28B93405B79D5C00A9906C /* ApplicationServices.framework in Frameworks */,
 				AB28B93505B79D5D00A9906C /* IOKit.framework in Frameworks */,
-				F35B0D8F28954862008ABE3E /* FeedbackReporter.framework in Frameworks */,
 				AB28B93705B79D5E00A9906C /* Accelerate.framework in Frameworks */,
 				F3E3E6CD289527220037A247 /* UserNotifications.framework in Frameworks */,
 				CEF0E6DC06AEF5CB001FF9E5 /* Carbon.framework in Frameworks */,
@@ -5859,7 +5796,6 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				F35B0D8E28954830008ABE3E /* FeedbackReporter.framework */,
 				F3E3E6CA289527220037A247 /* UserNotifications.framework */,
 				992264F92028CE62004C4995 /* homephone.framework */,
 				439B8C131A19CCC300F396D7 /* 3DconnexionClient.framework */,
@@ -9941,7 +9877,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				99C0EE1B202A101000D88E8D /* PBXTargetDependency */,
 				71A523192021D2400065793A /* PBXTargetDependency */,
 				71A5234D20220F990065793A /* PBXTargetDependency */,
 				71A5233F2021DB770065793A /* PBXTargetDependency */,
@@ -9999,7 +9934,6 @@
 				71A5234B20220F910065793A /* PBXTargetDependency */,
 				71A5233D2021DB6C0065793A /* PBXTargetDependency */,
 				5F31DAC6241AE12300573589 /* PBXTargetDependency */,
-				F35B0D8928953DE9008ABE3E /* PBXTargetDependency */,
 				71C99E991D19A7FB00208F3B /* PBXTargetDependency */,
 				71C99E9B1D19A7FD00208F3B /* PBXTargetDependency */,
 				71C99EA11D19A80A00208F3B /* PBXTargetDependency */,
@@ -10019,7 +9953,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				99C0EE1D202A102600D88E8D /* PBXTargetDependency */,
 				71A5231B2021D2480065793A /* PBXTargetDependency */,
 				71A5230B2021C8A80065793A /* PBXTargetDependency */,
 				71A5234F20220FA10065793A /* PBXTargetDependency */,
@@ -10104,10 +10037,8 @@
 				71A5230E2021D1B60065793A /* CharLS */,
 				71A5231C2021D2B50065793A /* OpenJPEG */,
 				71A5232A2021D3420065793A /* OpenSSL */,
-				9920CBEC202A0BA600FE0A2A /* Grok */,
 				71E6C0B01FBAD31E00FF75B6 /* Submodules */,
 				5F1E2A682411AE7E00365A0C /* DCMTK */,
-				F35B0D7C289535B6008ABE3E /* FeedbackReporter */,
 			);
 		};
 /* End PBXProject section */
@@ -10765,22 +10696,6 @@
 				"",
 			);
 		};
-		9920CBEF202A0BA600FE0A2A /* CMake */ = {
-			isa = PBXShellScriptBuildPhase;
-			name = CMake;
-			shellPath = /bin/sh;
-			shellScript = (
-				"sh \"Horos/Scripts/$TARGET_NAME/CMake.sh\"",
-			);
-		};
-		9920CBF0202A0BA600FE0A2A /* Make */ = {
-			isa = PBXShellScriptBuildPhase;
-			name = Make;
-			shellPath = /bin/sh;
-			shellScript = (
-				"sh \"Horos/Scripts/$TARGET_NAME/Make.sh\"",
-			);
-		};
 		AB0F3A3F1046BE51004129DD /* Copy Headers and Create Horos.h */ = {
 			isa = PBXShellScriptBuildPhase;
 			name = "Copy Headers and Create Horos.h";
@@ -10895,18 +10810,6 @@
 				"#codesign --resource-rules Rules.plist -f -s \"Developer ID Application\" \"${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}/\"",
 				"#echo \"code signed\"",
 				"#fi",
-				"",
-			);
-		};
-		F35B0D84289535B6008ABE3E /* Make */ = {
-			isa = PBXShellScriptBuildPhase;
-			name = Make;
-			outputPaths = (
-				"$(BUILT_PRODUCTS_DIR)/FeedbackReporter.framework",
-			);
-			shellPath = /bin/sh;
-			shellScript = (
-				"sh \"Horos/Scripts/$TARGET_NAME/Make.sh\"",
 				"",
 			);
 		};
@@ -12579,25 +12482,10 @@
 			target = AB724F300ADE6ECB00A212A0 /* Decompress */;
 			targetProxy = 71C99EA01D19A80A00208F3B /* PBXContainerItemProxy */;
 		};
-		9920CBED202A0BA600FE0A2A /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 71E6C0B01FBAD31E00FF75B6 /* Submodules */;
-			targetProxy = 9920CBEE202A0BA600FE0A2A /* PBXContainerItemProxy */;
-		};
 		9937E81B24363D3700768B14 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 71A5232A2021D3420065793A /* OpenSSL */;
 			targetProxy = 9937E81A24363D3700768B14 /* PBXContainerItemProxy */;
-		};
-		99C0EE1B202A101000D88E8D /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 9920CBEC202A0BA600FE0A2A /* Grok */;
-			targetProxy = 99C0EE1A202A101000D88E8D /* PBXContainerItemProxy */;
-		};
-		99C0EE1D202A102600D88E8D /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 9920CBEC202A0BA600FE0A2A /* Grok */;
-			targetProxy = 99C0EE1C202A102600D88E8D /* PBXContainerItemProxy */;
 		};
 		99C0EE21202A63EA00D88E8D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -12613,16 +12501,6 @@
 			isa = PBXTargetDependency;
 			target = 4A2F5931078D148300C514A2 /* Unzip Binaries */;
 			targetProxy = 99FE27FC1CF4A442003C32AB /* PBXContainerItemProxy */;
-		};
-		F35B0D7D289535B6008ABE3E /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 71E6C0B01FBAD31E00FF75B6 /* Submodules */;
-			targetProxy = F35B0D7E289535B6008ABE3E /* PBXContainerItemProxy */;
-		};
-		F35B0D8928953DE9008ABE3E /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = F35B0D7C289535B6008ABE3E /* FeedbackReporter */;
-			targetProxy = F35B0D8828953DE9008ABE3E /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -13296,7 +13174,6 @@
 				GCC_PREFIX_HEADER = Horos/prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
-					USEFEEDBACKREPORTER,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				INFOPLIST_FILE = Horos/Info.plist;
@@ -13311,7 +13188,6 @@
 					$CONFIGURATION_TEMP_DIR/GDCM.build/Install/wlib,
 					$CONFIGURATION_TEMP_DIR/ITK.build/Install/wlib,
 					$CONFIGURATION_TEMP_DIR/VTK.build/Install/wlib,
-					$CONFIGURATION_TEMP_DIR/Grok.build/Install/lib,
 					$CONFIGURATION_TEMP_DIR/CharLS.build/Install/lib,
 					"$(PROJECT_DIR)/DICOMPrint",
 				);
@@ -13329,8 +13205,6 @@
 					"-lVTK",
 					"-lopenjp2",
 					"-lCharLS",
-					"-framework",
-					FeedbackReporter,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "$(PRODUCT_BUNDLE_IDENTIFIER_PREFIX).horos";
 				PRODUCT_NAME = Horos;
@@ -13339,8 +13213,6 @@
 				SYSTEM_HEADER_SEARCH_PATHS = (
 					$CONFIGURATION_TEMP_DIR/OpenJPEG.build/Install/include,
 					$CONFIGURATION_TEMP_DIR/OpenJPEG.build/Install/include/OpenJPEG,
-					$CONFIGURATION_TEMP_DIR/Grok.build/Install/include,
-					$CONFIGURATION_TEMP_DIR/GDCM.build/Install/include,
 					$CONFIGURATION_TEMP_DIR/OpenSSL.build/Install/include,
 					$CONFIGURATION_TEMP_DIR/CharLS.build/Install/include,
 					$CONFIGURATION_TEMP_DIR/ITK.build/Install/include,
@@ -13368,14 +13240,12 @@
 				HEADER_SEARCH_PATHS = (
 					$CONFIGURATION_TEMP_DIR/OpenJPEG.build/Install/include,
 					$CONFIGURATION_TEMP_DIR/OpenJPEG.build/Install/include/OpenJPEG,
-					$CONFIGURATION_TEMP_DIR/Grok.build/Install/include,
 					$CONFIGURATION_TEMP_DIR/CharLS.build/Install/include,
 				);
 				INFOPLIST_FILE = "DCM Framework/Info.plist";
 				INSTALL_PATH = "@executable_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					$CONFIGURATION_TEMP_DIR/OpenJPEG.build/Install/lib,
-					$CONFIGURATION_TEMP_DIR/Grok.build/Install/lib,
 					$CONFIGURATION_TEMP_DIR/CharLS.build/Install/lib,
 				);
 				OTHER_CFLAGS = "$(inherited)";
@@ -13431,7 +13301,6 @@
 					"$(inherited)",
 					Binaries/Ming,
 					$CONFIGURATION_TEMP_DIR/GDCM.build/Install/wlib,
-					$CONFIGURATION_TEMP_DIR/Grok.build/Install/lib,
 					$CONFIGURATION_TEMP_DIR/CharLS.build/Install/lib,
 					$CONFIGURATION_TEMP_DIR/OpenJPEG.build/Install/lib,
 				);
@@ -13446,7 +13315,6 @@
 				SYSTEM_HEADER_SEARCH_PATHS = (
 					$CONFIGURATION_TEMP_DIR/OpenJPEG.build/Install/include,
 					$CONFIGURATION_TEMP_DIR/OpenJPEG.build/Install/include/OpenJPEG,
-					$CONFIGURATION_TEMP_DIR/Grok.build/Install/include,
 					$CONFIGURATION_TEMP_DIR/CharLS.build/Install/include,
 					$CONFIGURATION_TEMP_DIR/GDCM.build/Install/include,
 					$CONFIGURATION_TEMP_DIR/VTK.build/Install/include,
@@ -13655,14 +13523,12 @@
 				HEADER_SEARCH_PATHS = (
 					$CONFIGURATION_TEMP_DIR/OpenJPEG.build/Install/include,
 					$CONFIGURATION_TEMP_DIR/OpenJPEG.build/Install/include/OpenJPEG,
-					$CONFIGURATION_TEMP_DIR/Grok.build/Install/include,
 					$CONFIGURATION_TEMP_DIR/CharLS.build/Install/include,
 				);
 				INFOPLIST_FILE = "DCM Framework/Info.plist";
 				INSTALL_PATH = "@executable_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					$CONFIGURATION_TEMP_DIR/OpenJPEG.build/Install/lib,
-					$CONFIGURATION_TEMP_DIR/Grok.build/Install/lib,
 					$CONFIGURATION_TEMP_DIR/CharLS.build/Install/lib,
 				);
 				OTHER_CFLAGS = "$(inherited)";
@@ -13703,7 +13569,6 @@
 				GCC_PREFIX_HEADER = Horos/prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
-					USEFEEDBACKREPORTER,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				INFOPLIST_FILE = Horos/Info.plist;
@@ -13716,7 +13581,6 @@
 					$CONFIGURATION_TEMP_DIR/GDCM.build/Install/wlib,
 					$CONFIGURATION_TEMP_DIR/ITK.build/Install/wlib,
 					$CONFIGURATION_TEMP_DIR/VTK.build/Install/wlib,
-					$CONFIGURATION_TEMP_DIR/Grok.build/Install/lib,
 					$CONFIGURATION_TEMP_DIR/CharLS.build/Install/lib,
 					"$(PROJECT_DIR)/DICOMPrint",
 				);
@@ -13734,8 +13598,6 @@
 					"-lVTK",
 					"-lopenjp2",
 					"-lCharLS",
-					"-framework",
-					FeedbackReporter,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "$(PRODUCT_BUNDLE_IDENTIFIER_PREFIX).horos";
 				PRODUCT_NAME = Horos;
@@ -13745,7 +13607,6 @@
 				SYSTEM_HEADER_SEARCH_PATHS = (
 					$CONFIGURATION_TEMP_DIR/OpenJPEG.build/Install/include,
 					$CONFIGURATION_TEMP_DIR/OpenJPEG.build/Install/include/OpenJPEG,
-					$CONFIGURATION_TEMP_DIR/Grok.build/Install/include,
 					$CONFIGURATION_TEMP_DIR/GDCM.build/Install/include,
 					$CONFIGURATION_TEMP_DIR/OpenSSL.build/Install/include,
 					$CONFIGURATION_TEMP_DIR/CharLS.build/Install/include,
@@ -13831,26 +13692,6 @@
 			};
 			name = Debug;
 		};
-		9920CBF2202A0BA600FE0A2A /* Debug configuration for PBXAggregateTarget "Grok" */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				DEAD_CODE_STRIPPING = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = NO;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-			};
-			name = Debug;
-		};
-		9920CBF3202A0BA600FE0A2A /* Release configuration for PBXAggregateTarget "Grok" */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				DEAD_CODE_STRIPPING = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = NO;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-			};
-			name = Release;
-		};
 		AB0F3A2E1046BD2D004129DD /* Debug configuration for PBXNativeTarget "API" */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = F3C3F0702893A429004B2F61 /* Horos.xcconfig */;
@@ -13893,7 +13734,6 @@
 					"$(inherited)",
 					Binaries/Ming,
 					$CONFIGURATION_TEMP_DIR/GDCM.build/Install/wlib,
-					$CONFIGURATION_TEMP_DIR/Grok.build/Install/lib,
 					$CONFIGURATION_TEMP_DIR/CharLS.build/Install/lib,
 					$CONFIGURATION_TEMP_DIR/OpenJPEG.build/Install/lib,
 				);
@@ -13909,7 +13749,6 @@
 				SYSTEM_HEADER_SEARCH_PATHS = (
 					$CONFIGURATION_TEMP_DIR/OpenJPEG.build/Install/include,
 					$CONFIGURATION_TEMP_DIR/OpenJPEG.build/Install/include/OpenJPEG,
-					$CONFIGURATION_TEMP_DIR/Grok.build/Install/include,
 					$CONFIGURATION_TEMP_DIR/CharLS.build/Install/include,
 					$CONFIGURATION_TEMP_DIR/GDCM.build/Install/include,
 					$CONFIGURATION_TEMP_DIR/VTK.build/Install/include,
@@ -13931,26 +13770,6 @@
 				PRODUCT_NAME = Documentation;
 			};
 			name = Debug;
-		};
-		F35B0D86289535B6008ABE3E /* Debug configuration for PBXAggregateTarget "FeedbackReporter" */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				DEAD_CODE_STRIPPING = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = NO;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-			};
-			name = Debug;
-		};
-		F35B0D87289535B6008ABE3E /* Release configuration for PBXAggregateTarget "FeedbackReporter" */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				DEAD_CODE_STRIPPING = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = NO;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-			};
-			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
@@ -14051,14 +13870,6 @@
 			);
 			defaultConfigurationName = Release;
 		};
-		9920CBF1202A0BA600FE0A2A /* Build configuration list for PBXAggregateTarget "Grok" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				9920CBF2202A0BA600FE0A2A /* Debug configuration for PBXAggregateTarget "Grok" */,
-				9920CBF3202A0BA600FE0A2A /* Release configuration for PBXAggregateTarget "Grok" */,
-			);
-			defaultConfigurationName = Release;
-		};
 		AB0F3A321046BD2D004129DD /* Build configuration list for PBXNativeTarget "API" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -14080,14 +13891,6 @@
 			buildConfigurations = (
 				BF7486A60CC6AA5D00198387 /* Debug configuration for PBXAggregateTarget "Documentation" */,
 				43E98D201A32BF6A001B9E51 /* Release configuration for PBXAggregateTarget "Documentation" */,
-			);
-			defaultConfigurationName = Release;
-		};
-		F35B0D85289535B6008ABE3E /* Build configuration list for PBXAggregateTarget "FeedbackReporter" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				F35B0D86289535B6008ABE3E /* Debug configuration for PBXAggregateTarget "FeedbackReporter" */,
-				F35B0D87289535B6008ABE3E /* Release configuration for PBXAggregateTarget "FeedbackReporter" */,
 			);
 			defaultConfigurationName = Release;
 		};
