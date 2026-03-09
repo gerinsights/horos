@@ -99,8 +99,6 @@
 #include "vtkColorTransferFunction.h"
 #include "vtkVolumeProperty.h"
 //#include "vtkVolumeRayCastCompositeFunction.h"
-#include "vtkVolumeRayCastMapper.h"
-#include "vtkVolumeRayCastMIPFunction.h"
 
 #include "vtkTransform.h"
 #include "vtkSphere.h"

@@ -95,9 +95,6 @@
 #include "vtkColorTransferFunction.h"
 #include "vtkVolumeProperty.h"
 //#include "vtkVolumeRayCastCompositeFunction.h"
-#include "vtkVolumeRayCastMapper.h"
-#include "vtkVolumeRayCastMIPFunction.h"
-#include "vtkFixedPointVolumeRayCastMapper.h"
 #include "vtkTransform.h"
 #include "vtkSphere.h"
 #include "vtkImplicitBoolean.h"
@@ -123,7 +120,6 @@
 #include "vtkAnnotatedCubeActor.h"
 #include "vtkOrientationMarkerWidget.h"
 //#include "vtkVolumeTextureMapper2D.h"
-#include "vtkVolumeTextureMapper3D.h"
 
 #include "vtkCellArray.h"
 #include "vtkProperty2D.h"

@@ -79,7 +79,7 @@
 //#include <vtkVolumeRayCastCompositeFunction.h>
 //#include <vtkVolumeRayCastMapper.h>
 //#include <vtkVolumeRayCastMIPFunction.h>
-#include <vtkFixedPointVolumeRayCastMapper.h>
+//#include <vtkFixedPointVolumeRayCastMapper.h>
 #include <vtkTransform.h>
 #include <vtkSphere.h>
 #include <vtkImplicitBoolean.h>
