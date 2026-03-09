@@ -83,9 +83,7 @@ dddd
 #include "vtkAbstractPropPicker.h"
 #include "vtkInteractorStyle.h"
 #include "vtkWorldPointPicker.h"
-#include "vtkOpenGLVolumeTextureMapper3D.h"
 #include "vtkPropAssembly.h"
-#include "vtkFixedPointRayCastImage.h"
 
 #include "vtkSphereSource.h"
 #include "vtkAssemblyPath.h"
@@ -2131,128 +2129,10 @@ static void  updateRight(vtkObject*, unsigned long eid, void* clientdata, void *
         mapper = volumeMapper;
     }
     
-    if( mapper)
-    {
-        vtkFixedPointRayCastImage *rayCastImage = mapper->GetRayCastImage();
-        
-        unsigned short *im = rayCastImage->GetImage();
-        
-        int fullSize[2];
-        rayCastImage->GetImageMemorySize( fullSize);
-        
-        int size[2];
-        rayCastImage->GetImageInUseSize( size);
-        
-        *w = size[0];
-        *h = size[1];
-        
-        if( renderingMode == 1 || renderingMode == 3 || renderingMode == 2)		// MIP
-        {
-            unsigned short *destPtr, *destFixedPtr;
-            
-            destPtr = destFixedPtr = (unsigned short*) malloc( (*w+1) * (*h+1) * sizeof( unsigned short));
-            if( destFixedPtr)
-            {
-                unsigned short *iptr;
-                
-                iptr = im + 3 + 4*(*h-1)*fullSize[0];
-                vImage_Buffer src, dst;
-                
-                int j = *h, rowBytes = 4*fullSize[0];
-                while( j-- > 0)
-                {
-                    unsigned short *iptrTemp = iptr;
-                    int i = *w;
-                    while( i-- > 0)
-                    {
-                        *destPtr++ = *iptrTemp;
-                        iptrTemp += 4;
-                    }
-                    
-                    iptr -= rowBytes;
-                }
-                
-                float mul;
-                float add;
-                
-                if( blendingView)
-                {
-                    mul = 1./blendingValueFactor;
-                    add = -blendingOFFSET16;
-                    
-                    if( blendingValueFactor != 1)
-                        mul = mul;
-                    else
-                        mul = 1;
-                }
-                else
-                {
-                    mul = 1./valueFactor;
-                    add = -OFFSET16;
-                    
-                    if( valueFactor != 1)
-                        mul = mul;
-                    else
-                        mul = 1;
-                }
-                
-                src.data = destFixedPtr;
-                src.height = *h;
-                src.width = *w;
-                src.rowBytes = *w * 2;
-                
-                dst.data = malloc( (*w+1) * (*h+1) * sizeof( float));
-                if( dst.data)
-                {
-                    dst.height = *h;
-                    dst.width = *w;
-                    dst.rowBytes = *w * 4;
-                    
-                    vImageConvert_16UToF( &src, &dst, add, mul, 0);
-                }
-                
-                *rgb = NO;
-                
-                free( destFixedPtr);
-                
-                return (float*) dst.data;
-            }
-        }
-        else
-        {
-            unsigned char *destPtr, *destFixedPtr;
-            
-            destPtr = destFixedPtr = (unsigned char*) malloc( (*w+1) * (*h+1) * 4 * sizeof( unsigned char));
-            if( destFixedPtr)
-            {
-                unsigned short *iptr = im + 3 + 4*(*h-1)*fullSize[0];
-                vImage_Buffer src, dst;
-                
-                int j = *h, rowBytes = 4*fullSize[0];
-                while( j-- > 0)
-                {
-                    unsigned short *iptrTemp = iptr;
-                    int i = *w;
-                    while( i-- > 0)
-                    {
-                        *destPtr = 255;
-                        destPtr++;
-                        iptrTemp++;
-                        
-                        *destPtr++ = *iptrTemp++ >> 7;
-                        *destPtr++ = *iptrTemp++ >> 7;
-                        *destPtr++ = *iptrTemp++ >> 7;
-                    }
-                    
-                    iptr -= rowBytes;
-                }
-                
-                *rgb = YES;
-                
-                return (float*) destFixedPtr;
-            }
-        }
-    }
+    // vtkSmartVolumeMapper does not expose an internal pixel buffer.
+    // Full-depth raw-pixel extraction requires Metal/GPU readback (TODO: Sprint 5).
+    (void)mapper;
+    (void)firstObj;
     
     return nil;
 }
