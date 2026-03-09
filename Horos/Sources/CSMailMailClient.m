@@ -402,6 +402,8 @@ void QuitAndSleep(NSString* bundleIdentifier, float seconds)
                     @catch (NSException *e)
                     {
                         NSLog( @"***** exception in %s: %@", __PRETTY_FUNCTION__, e);
+                        if (passwordData) { CFRelease(passwordData); passwordData = NULL; }
+                        err = errSecItemNotFound;
                     }
                 }
 

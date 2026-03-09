@@ -263,14 +263,16 @@ static NSRecursiveLock *lockFile = nil;
 						&outItems);            // CFArrayRef *outItems
 
 	NSLog(@"OSStatus: %i", (int) err);
-
 	NSLog(@"SecExternalFormat: %@", [DDKeychain stringForSecExternalFormat:inputFormat]);
 	NSLog(@"SecExternalItemType: %@", [DDKeychain stringForSecExternalItemType:itemType]);
-
 	NSLog(@"outItems: %@", (NSArray *)outItems);
 
-	SecIdentityRef identity = (SecIdentityRef)[(NSArray *)outItems lastObject];
-	[DDKeychain KeychainAccessSetPreferredIdentity:identity forName:@"org.horosproject.horoswebserver" keyUse:0];
+	if (err == errSecSuccess && outItems && CFArrayGetCount(outItems) > 0) {
+		SecIdentityRef identity = (SecIdentityRef)[(NSArray *)outItems lastObject];
+		[DDKeychain KeychainAccessSetPreferredIdentity:identity forName:@"org.horosproject.horoswebserver" keyUse:0];
+	} else if (err != errSecSuccess) {
+		NSLog(@"createNewIdentity: SecItemImport failed: %@", [DDKeychain stringForError:err]);
+	}
 	
 	// Don't forget to delete the temporary files
 	[[NSFileManager defaultManager] removeItemAtPath:privateKeyPath error:NULL];
@@ -479,8 +481,6 @@ static NSRecursiveLock *lockFile = nil;
     };
     if (arrayRef)
         CFRelease(arrayRef);
-    if (searchList)
-        CFRelease(searchList);
 
     return found;
 }
