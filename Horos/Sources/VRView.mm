@@ -129,7 +129,7 @@ extern "C"
 //#define BONEVALUE 250
 #define BONEOPACITY 1.1
 
-extern int dontRenderVolumeRenderingOsiriX;	// VTK9: move to vtkSmartVolumeMapper (issue #16)
+int dontRenderVolumeRenderingOsiriX = 0;	// VTK9: move to vtkSmartVolumeMapper (issue #16)
 extern unsigned int minimumStep;
 
 static NSRecursiveLock *drawLock = nil;
