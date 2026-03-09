@@ -1533,7 +1533,6 @@
 		ABDEBD6C063D693F005B99B4 /* add.tif in Resources */ = {isa = PBXBuildFile; fileRef = ABDEBD51063D6938005B99B4 /* add.tif */; };
 		ABDEBD6D063D693F005B99B4 /* minus.tif in Resources */ = {isa = PBXBuildFile; fileRef = ABDEBD52063D6938005B99B4 /* minus.tif */; };
 		ABDF5A1D0A1B641F002A353A /* small_sharedSmartAlbum.tif in Resources */ = {isa = PBXBuildFile; fileRef = A9B411C10890496400913770 /* small_sharedSmartAlbum.tif */; };
-		ABE0D6940CDB1A4400F0494B /* iChatHelper.xib in Resources */ = {isa = PBXBuildFile; fileRef = ABE0D6920CDB1A4400F0494B /* iChatHelper.xib */; };
 		ABE0D6A20CDB1B9E00F0494B /* browse2OsiriX_small.png in Resources */ = {isa = PBXBuildFile; fileRef = ABE0D69B0CDB1B9E00F0494B /* browse2OsiriX_small.png */; };
 		ABE0D6A30CDB1B9E00F0494B /* iChatIcon.png in Resources */ = {isa = PBXBuildFile; fileRef = ABE0D69C0CDB1B9E00F0494B /* iChatIcon.png */; };
 		ABE0D6A40CDB1B9E00F0494B /* iChatTheatre-English.html in Resources */ = {isa = PBXBuildFile; fileRef = ABE0D69D0CDB1B9E00F0494B /* iChatTheatre-English.html */; };
@@ -3361,7 +3360,6 @@
 		200BBB0120AA3BCE002914C4 /* ja-JP */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = "ja-JP"; path = "ja-JP.lproj/OSIAutoroutingPreferencePanePref.xib"; sourceTree = "<group>"; };
 		200BBB0220AA3BCE002914C4 /* ja-JP */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = "ja-JP"; path = "ja-JP.lproj/OSI3DPreferencePanePref.xib"; sourceTree = "<group>"; };
 		200BBB0320AA3BCE002914C4 /* ja-JP */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = "ja-JP"; path = "ja-JP.lproj/AYDicomPrintPref.xib"; sourceTree = "<group>"; };
-		200BBB0420AA3BCE002914C4 /* ja-JP */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = "ja-JP"; path = "ja-JP.lproj/iChatHelper.xib"; sourceTree = "<group>"; };
 		200BBB0520AA3BCF002914C4 /* ja-JP */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = "ja-JP"; path = "ja-JP.lproj/3DPosition.xib"; sourceTree = "<group>"; };
 		200BBB0620AA3BCF002914C4 /* ja-JP */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = "ja-JP"; path = "ja-JP.lproj/AnonymizationCustomTagPanel.xib"; sourceTree = "<group>"; };
 		200BBB0720AA3BCF002914C4 /* ja-JP */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = "ja-JP"; path = "ja-JP.lproj/AnonymizationPanel.xib"; sourceTree = "<group>"; };
@@ -4412,7 +4410,6 @@
 		ABDC3C730670FF440042069D /* ToolBarNSWindow.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = ToolBarNSWindow.h; sourceTree = "<group>"; };
 		ABDEBD51063D6938005B99B4 /* add.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = add.tif; sourceTree = "<group>"; };
 		ABDEBD52063D6938005B99B4 /* minus.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = minus.tif; sourceTree = "<group>"; };
-		ABE0D6930CDB1A4400F0494B /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = en.lproj/iChatHelper.xib; sourceTree = "<group>"; };
 		ABE0D69B0CDB1B9E00F0494B /* browse2OsiriX_small.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = browse2OsiriX_small.png; sourceTree = "<group>"; };
 		ABE0D69C0CDB1B9E00F0494B /* iChatIcon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = iChatIcon.png; sourceTree = "<group>"; };
 		ABE0D69D0CDB1B9E00F0494B /* iChatTheatre-English.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "iChatTheatre-English.html"; sourceTree = "<group>"; };
@@ -6233,7 +6230,6 @@
 				AB78245B0D3BACC700460DCE /* WebServicesHTML */,
 				CEC4B5A20C7DF2D600AF5A76 /* 3DPRESETS */,
 				ABE0D69A0CDB1B9E00F0494B /* iChatTheatreHelp */,
-				ABE0D6920CDB1A4400F0494B /* iChatHelper.xib */,
 				59FB652912312D8900EBA136 /* weasis */,
 				7183153D1610651E0098576F /* weasis-ext-config.properties */,
 				CECDBE690C95467B006B11A5 /* AnnotationsDefault.plist */,
@@ -10352,7 +10348,6 @@
 				A977ECAD0CD1F7E500C418D8 /* QRpartiallyInDatabase.tif in Resources */,
 				71AD674A1FC4248100A1E2F8 /* French.plist in Resources */,
 				A977ECAE0CD1F7E500C418D8 /* QRalreadyInDatabase.tif in Resources */,
-				ABE0D6940CDB1A4400F0494B /* iChatHelper.xib in Resources */,
 				ABE0D6A20CDB1B9E00F0494B /* browse2OsiriX_small.png in Resources */,
 				ABE0D6A30CDB1B9E00F0494B /* iChatIcon.png in Resources */,
 				841B0B3A18980EFF0007E5C5 /* 3DCutRead.png in Resources */,
@@ -12759,15 +12754,6 @@
 			name = Loupe.xib;
 			sourceTree = "<group>";
 		};
-		ABE0D6920CDB1A4400F0494B /* iChatHelper.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				ABE0D6930CDB1A4400F0494B /* English */,
-				200BBB0420AA3BCE002914C4 /* ja-JP */,
-			);
-			name = iChatHelper.xib;
-			sourceTree = "<group>";
-		};
 		CE286C100964196C001A4573 /* Localizable.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -13236,7 +13222,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
@@ -13789,7 +13775,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_LINK_OBJC_RUNTIME = NO;
 				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;

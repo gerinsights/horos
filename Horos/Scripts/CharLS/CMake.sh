@@ -69,6 +69,9 @@ if [ ${#ldfs[@]} -ne 0 ]; then
     args+=(-DCMAKE_EXE_LINKER_FLAGS="$ldfs")
 fi
 
+args+=(-DCMAKE_CXX_STANDARD=17)
+args+=(-DCMAKE_CXX_STANDARD_REQUIRED=ON)
+
 cd "$cmake_dir"
 cmake "${args[@]}"
 

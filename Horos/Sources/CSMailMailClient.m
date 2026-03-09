@@ -422,8 +422,6 @@ void QuitAndSleep(NSString* bundleIdentifier, float seconds)
                     
                     if (err != noErr)
                     {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
                         NSLog(@"**** MailMe: Could not get password for SMTP account %@: %i/%s", username, (int)err, GetMacOSStatusCommentString(err));
 #pragma clang diagnostic pop
                     }

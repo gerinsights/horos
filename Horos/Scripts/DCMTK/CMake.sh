@@ -72,6 +72,9 @@ args+=(-DOPENSSL_CRYPTO_LIBRARY="$CONFIGURATION_TEMP_DIR/OpenSSL.build/Install/l
 args+=(-DOPENSSL_INCLUDE_DIR="$CONFIGURATION_TEMP_DIR/OpenSSL.build/Install/include")
 args+=(-DOPENSSL_SSL_LIBRARY="$CONFIGURATION_TEMP_DIR/OpenSSL.build/Install/lib/libssl.a")
 
+args+=(-DCMAKE_CXX_STANDARD=17)
+args+=(-DCMAKE_CXX_STANDARD_REQUIRED=ON)
+
 cd "$cmake_dir"
 cmake "${args[@]}"
 

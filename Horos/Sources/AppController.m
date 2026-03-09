@@ -667,8 +667,6 @@ void exceptionHandler(NSException *exception)
     if ([info respondsToSelector:@selector(operatingSystemVersion)])
         return [info operatingSystemVersion];
     
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     SInt32 major = 0, minor = 0, patch = 0;
     Gestalt(gestaltSystemVersionMajor, &major);
     Gestalt(gestaltSystemVersionMinor, &minor);

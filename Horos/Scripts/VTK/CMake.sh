@@ -81,9 +81,6 @@ fi
 if [ ! -z "$CLANG_CXX_LANGUAGE_STANDARD" ]; then
 #    args+=(-DCMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD="$CLANG_CXX_LANGUAGE_STANDARD")
     cxxstd="$CLANG_CXX_LANGUAGE_STANDARD"
-    if [ "$cxxstd" = "c++0x" ]; then
-        cxxstd="c++11"
-    fi
     cxxfs+=(-std="$cxxstd")
 fi
 
@@ -93,7 +90,7 @@ for i in "${!cxxfs[@]}"; do
         unset 'cxxfs[$i]'
     fi
 done
-cxxfs+=( -std=c++11 )
+cxxfs+=( -std=c++17 )
 
 if [ ${#cxxfs[@]} -ne 0 ]; then
     cxxfss="${cxxfs[@]}"
@@ -101,7 +98,7 @@ if [ ${#cxxfs[@]} -ne 0 ]; then
 fi
 
 # Force a modern C++ standard for VTK/eigen compatibility
-args+=(-DCMAKE_CXX_STANDARD=11)
+args+=(-DCMAKE_CXX_STANDARD=17)
 args+=(-DCMAKE_CXX_STANDARD_REQUIRED=ON)
 
 cmake "${args[@]}"

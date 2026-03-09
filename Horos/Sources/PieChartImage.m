@@ -51,8 +51,6 @@
 {
 	NSRect pieRect = NSMakeRect(0,0,14.0,14.0);
 	NSImage* pieImage = [[self alloc] initWithSize:pieRect.size];
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     [pieImage setScalesWhenResized:YES];
 #pragma clang diagnostic pop
 

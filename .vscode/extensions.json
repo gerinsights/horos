@@ -1,0 +1,13 @@
+{
+  "recommendations": [
+    "ms-vscode.cpptools",
+    "llvm-vs-code-extensions.vscode-clangd",
+    "vadimcn.vscode-lldb",
+    "ms-vscode.makefile-tools",
+    "twxs.cmake",
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "redhat.vscode-xml",
+    "davidanson.vscode-markdownlint"
+  ]
+}

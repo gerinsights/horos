@@ -1,0 +1,28 @@
+plugin,plugin_type,has_xcodeproj,source_files,uses_objc,uses_objcpp,uses_cpp,uses_swift,uses_itk,uses_vtk,uses_opengl,uses_carbon,uses_qtkit,uses_quicktime,uses_webkit,last_commit_date,last_commit_author,total_commits,contributors_top5,menu_titles,principal_class
+API,unknown,false,1,true,false,false,false,false,false,false,false,false,false,false,2018-03-19,David Davies-Payne,6,5:Fauze Polpeta|1:David Davies-Payne,,
+Binaries,unknown,false,1038,true,true,true,false,false,false,false,false,false,false,false,2022-07-30,Felix Ritter,2340,1641:Antoine Rosset|216:Alessandro Volz|193:Joris Heuberger|112:Lance Pysher|93:Fauze Polpeta,,
+CharLS,unknown,false,47,false,false,true,false,false,false,false,false,false,false,false,2017-11-03,Alessandro Volz,1,1:Alessandro Volz,,
+DCM Framework,unknown,true,168,true,true,false,false,false,false,false,false,false,false,false,2018-07-04,Tiago Brizolara da Rosa,433,347:Antoine Rosset|38:Alessandro Volz|13:Lance Pysher|12:Fauze Polpeta|4:Joris Heuberger,,NSApplication
+DCMTK,unknown,false,2214,false,false,true,false,false,false,false,false,false,false,false,2022-07-30,Felix Ritter,8,3:Fauze Polpeta|2:Felix Ritter|2:Todd Jensen|1:Alessandro Volz,,
+DICOMPrint,unknown,false,4,true,true,false,false,false,false,false,false,false,false,false,2020-02-24,Todd Jensen,7,4:Fauze Polpeta|2:Todd Jensen|1:Alessandro Volz,,
+Decompress,unknown,false,1,false,true,false,false,false,false,false,false,false,false,false,2022-07-28,Felix Ritter,8,3:Alessandro Volz|3:Fauze Polpeta|1:Felix Ritter|1:Todd Jensen,,
+DicomImporter,unknown,true,2,true,false,false,false,false,false,false,false,false,false,false,2009-09-06,Antoine Rosset,2,2:Antoine Rosset,,
+FeedbackReporter,unknown,true,28,true,false,false,false,false,false,false,false,false,false,false,2022-07-30,Felix Ritter,1,1:Felix Ritter,,FRExceptionReportingApplication
+GDCM,unknown,false,640,false,false,true,false,false,false,false,false,false,false,false,2022-07-20,Felix Ritter,5,4:Alessandro Volz|1:Felix Ritter,,
+Grok,unknown,false,307,false,false,true,false,false,false,false,false,false,false,false,2018-02-09,Fauze Polpeta,4,4:Fauze Polpeta,,
+Horos Launcher,unknown,false,0,false,false,false,false,false,false,false,false,false,false,false,2017-11-03,Alessandro Volz,4,2:Alessandro Volz|2:Fauze Polpeta,,NSApplication
+Horos.xcodeproj,unknown,true,0,false,false,false,false,false,false,false,false,false,false,false,2026-02-03,Yves Starreveld,187,85:Fauze Polpeta|60:Alessandro Volz|12:Felix Ritter|12:Todd Jensen|4:Purview Apple Developer,,
+Horos,unknown,false,699,true,true,true,false,false,false,false,false,false,false,false,2026-02-04,Yves Starreveld,284,139:Fauze Polpeta|68:Alessandro Volz|20:Tiago Brizolara da Rosa|18:Felix Ritter|13:Todd Jensen,,NSApplication
+ITK,unknown,false,4836,false,true,true,false,false,false,false,false,false,false,false,2022-07-28,Felix Ritter,4,3:Alessandro Volz|1:Felix Ritter,,
+LetsMoveAndDock,unknown,false,6,true,false,false,false,false,false,false,false,false,false,false,2018-01-08,Fauze Polpeta,19,7:Fauze Polpeta|5:Antoine Rosset|4:Alessandro Volz|2:Ian Cavén|1:osirixexperts,,
+MSRG,unknown,false,7,true,false,false,false,false,false,false,false,false,false,false,2017-12-28,Fauze Polpeta,19,8:Antoine Rosset|8:Arnaud Garcia|1:Fauze Polpeta|1:Joris Heuberger|1:Lance Pysher,,
+NIfTI_Library,unknown,false,5,false,false,false,false,false,false,false,false,false,false,false,2016-06-24,Alessandro Volz,6,3:Alessandro Volz|3:Antoine Rosset,,
+NSFont_OpenGL,unknown,false,2,true,false,false,false,false,false,false,false,false,false,false,2018-01-08,Fauze Polpeta,35,26:Antoine Rosset|5:Fauze Polpeta|2:Alessandro Volz|2:Lance Pysher,,
+Nitrogen,unknown,true,198,true,true,false,false,false,false,false,false,false,false,false,2019-10-04,Purview Apple Developer,12,5:Fauze Polpeta|4:Alessandro Volz|2:Ian Cavén|1:Purview Apple Developer,,
+OpenJPEG,unknown,false,323,false,false,true,false,false,false,false,false,false,false,false,2022-07-20,Felix Ritter,2,1:Alessandro Volz|1:Felix Ritter,,
+OpenSSL,unknown,false,3299,false,false,true,false,false,false,false,false,false,false,false,2022-07-19,Felix Ritter,4,3:Alessandro Volz|1:Felix Ritter,,
+Papyrus3,unknown,false,29,false,false,false,false,false,false,false,false,false,false,false,2014-01-31,Antoine Rosset,181,175:Antoine Rosset|3:R. B. Rakes|2:Lance Pysher|1:Joris Heuberger,,
+Preference Panes,unknown,false,76,true,true,true,false,false,false,false,false,false,false,false,2026-02-03,Yves Starreveld,1010,775:Antoine Rosset|81:Alessandro Volz|78:Joris Heuberger|31:Fauze Polpeta|22:Lance Pysher,,
+VTK,unknown,false,6710,true,true,true,true,false,true,false,false,false,false,false,2020-03-23,Todd Jensen,8,3:Fauze Polpeta|3:Todd Jensen|2:Alessandro Volz,,
+cocoahttpserver,unknown,true,29,true,false,false,false,false,false,false,false,false,false,false,2022-07-28,Felix Ritter,85,44:Antoine Rosset|21:Joris Heuberger|9:Alessandro Volz|8:Fauze Polpeta|2:Dirk-Willem van Gulik,,NSApplication
+docs,unknown,false,0,false,false,false,false,false,false,false,false,false,false,false,2026-03-08,kkp,1,1:kkp,,

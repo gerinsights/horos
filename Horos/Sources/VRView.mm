@@ -6958,8 +6958,6 @@ public:
         
         NSLog( @"ratio: %f", ratio);
     }
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     [currentImage setScalesWhenResized:YES];
 #pragma clang diagnostic pop
 
@@ -9408,8 +9406,6 @@ void VRSpaceNavigatorMessageHandler(io_connect_t connection, natural_t messageTy
         case kConnexionMsgDeviceState:
             state = (ConnexionDeviceState*)messageArgument;
             
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
             AbsoluteTime theTime = UpTime();
 #pragma clang diagnostic pop
             uint64_t t = ((uint64_t*) &theTime)[0];

@@ -1,0 +1,66 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "xcodebuild: Horos Debug",
+      "type": "shell",
+      "command": "xcodebuild",
+      "args": [
+        "-project",
+        "${workspaceFolder}/Horos.xcodeproj",
+        "-scheme",
+        "${input:horosScheme}",
+        "-configuration",
+        "${input:buildConfiguration}",
+        "-sdk",
+        "macosx",
+        "-derivedDataPath",
+        "${workspaceFolder}/build",
+        "build"
+      ],
+      "group": "build",
+      "problemMatcher": [
+        "$gcc"
+      ]
+    },
+    {
+      "label": "xcodebuild: Horos Clean",
+      "type": "shell",
+      "command": "xcodebuild",
+      "args": [
+        "-project",
+        "${workspaceFolder}/Horos.xcodeproj",
+        "-scheme",
+        "${input:horosScheme}",
+        "-configuration",
+        "${input:buildConfiguration}",
+        "-sdk",
+        "macosx",
+        "-derivedDataPath",
+        "${workspaceFolder}/build",
+        "clean"
+      ],
+      "problemMatcher": [
+        "$gcc"
+      ]
+    }
+  ],
+  "inputs": [
+    {
+      "id": "horosScheme",
+      "type": "promptString",
+      "description": "Xcode scheme for Horos",
+      "default": "Horos"
+    },
+    {
+      "id": "buildConfiguration",
+      "type": "pickString",
+      "description": "Build configuration",
+      "options": [
+        "Debug",
+        "Release"
+      ],
+      "default": "Debug"
+    }
+  ]
+}

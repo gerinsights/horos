@@ -86,6 +86,9 @@ fi
 
 #args+=(-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON)
 
+args+=(-DCMAKE_CXX_STANDARD=17)
+args+=(-DCMAKE_CXX_STANDARD_REQUIRED=ON)
+
 cmake "${args[@]}"
 
 echo "$hash" > "$cmake_dir/.cmakehash"
