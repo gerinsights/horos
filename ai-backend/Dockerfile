@@ -1,5 +1,5 @@
 # GPU backend: rocm, cuda, cpu
-ARG GPU_BACKEND=rocm
+ARG GPU_BACKEND=cpu
 
 # ---------- base ----------
 FROM python:3.12-slim AS base
@@ -17,13 +17,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
-# Run fipsinstall to generate the FIPS module config
-# This creates fipsmodule.cnf with the HMAC of the FIPS provider .so
-RUN if [ -f /usr/lib/x86_64-linux-gnu/ossl-modules/fips.so ]; then \
+# Detect OpenSSL modules path (varies by architecture) and run fipsinstall
+RUN OSSL_MODULES=$(openssl version -m 2>/dev/null | sed 's/.*"\(.*\)"/\1/' || true) && \
+    FIPS_SO=$(find /usr/lib -name "fips.so" 2>/dev/null | head -1) && \
+    if [ -n "$FIPS_SO" ]; then \
         openssl fipsinstall \
             -out /etc/ssl/fipsmodule.cnf \
-            -module /usr/lib/x86_64-linux-gnu/ossl-modules/fips.so && \
-        echo "FIPS provider installed successfully"; \
+            -module "$FIPS_SO" && \
+        echo "FIPS provider installed: $FIPS_SO" && \
+        echo "$OSSL_MODULES" > /etc/ssl/ossl-modules-path; \
     else \
         echo "FIPS provider .so not found — FIPS will be best-effort"; \
     fi
@@ -59,9 +61,8 @@ RUN groupadd -r aiuser && useradd -r -g aiuser -d /app -s /sbin/nologin aiuser &
 COPY --chown=aiuser:aiuser src/ /app/src/
 COPY --chown=aiuser:aiuser config/ /app/config/
 
-# FIPS OpenSSL configuration
+# FIPS OpenSSL configuration — detect modules path at runtime
 ENV OPENSSL_CONF=/app/config/openssl-fips.cnf
-ENV OPENSSL_MODULES=/usr/lib/x86_64-linux-gnu/ossl-modules
 
 USER aiuser
 

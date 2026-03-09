@@ -18,7 +18,6 @@ services:
     environment:
       - ORTHANC__NAME=AI_SEGMENT
       - OPENSSL_CONF=/etc/orthanc/openssl-fips.cnf
-      - OPENSSL_MODULES=/usr/lib/x86_64-linux-gnu/ossl-modules
     healthcheck:
       test: ["CMD", "curl", "-fsk", "http://localhost:8042/system"]
       interval: 30s
@@ -37,7 +36,7 @@ services:
     build:
       context: .
       args:
-        GPU_BACKEND: ${GPU_BACKEND:-rocm}
+        GPU_BACKEND: ${GPU_BACKEND:-cpu}
     networks:
       - internal
     expose:
@@ -61,7 +60,6 @@ services:
       - PACS_CORE_PORT=${PACS_CORE_PORT:-4242}
       - CONFIG_PATH=/app/config/settings.yaml
       - OPENSSL_CONF=/app/config/openssl-fips.cnf
-      - OPENSSL_MODULES=/usr/lib/x86_64-linux-gnu/ossl-modules
     healthcheck:
       test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/health').raise_for_status()"]
       interval: 30s

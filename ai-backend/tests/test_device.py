@@ -30,9 +30,9 @@ def test_detect_device_cpu_only():
 
 
 def test_device_info_summary():
-    info = DeviceInfo(backend="rocm", device_name="AMD RX 7600 XT", device_index=0, vram_mb=8192)
+    info = DeviceInfo(backend="rocm", device_name="AMD Radeon GPU", device_index=0, vram_mb=8192)
     assert "rocm:0" in info.summary()
-    assert "AMD RX 7600 XT" in info.summary()
+    assert "AMD Radeon GPU" in info.summary()
     assert "8192MB" in info.summary()
 
 

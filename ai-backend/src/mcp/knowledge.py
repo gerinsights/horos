@@ -9,8 +9,8 @@ ARCHITECTURE = """
 ## Nodes
 - **Scanners**: CT (CTA head/neck), MRI (brain)
 - **PACS_CORE**: Central DICOM server (Orthanc or dcm4chee), AE title `PACS_CORE`
-- **AI_SEGMENT**: AI segmentation node (Ryzen 9/Bazzite + RX 7600 XT eGPU), AE title `AI_SEGMENT`
-- **HOROS_M1**: Horos workstation (M1 Mac mini), AE title `HOROS_M1`
+- **AI_SEGMENT**: AI segmentation node (GPU-accelerated, ROCm/CUDA/CPU), AE title `AI_SEGMENT`
+- **HOROS_M1**: Horos workstation, AE title `HOROS_M1`
 
 ## Data Flow
 1. Scanner → PACS_CORE (C-STORE)
@@ -78,7 +78,7 @@ DICOM_FLOW = """
 ```
 ┌──────────┐     C-STORE      ┌────────────┐    Lua webhook    ┌──────────────┐
 │  Scanner  │ ──────────────→  │  PACS_CORE │ ──────────────→  │  AI_SEGMENT  │
-│  (CT/MR)  │                  │  (Orthanc)  │                  │  (Ryzen/GPU) │
+│  (CT/MR)  │                  │  (Orthanc)  │                  │  (GPU node) │
 └──────────┘                  └────────────┘                  └──────────────┘
                                      │                                │
                                      │ C-FIND/C-MOVE                  │ C-STORE
@@ -245,7 +245,7 @@ LLM_INTEGRATION = """
 - Models managed via `ollama pull` / Ollama REST API
 
 ## GPU Sharing
-- Segmentation and LLM share the RX 7600 XT GPU
+- Segmentation and LLM share the GPU (ROCm/CUDA)
 - Not simultaneous — segmentation runs first, then LLM for report generation
 - Ollama automatically manages VRAM allocation
 """
