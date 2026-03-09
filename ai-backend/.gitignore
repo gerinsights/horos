@@ -12,3 +12,7 @@ __pycache__/
 dist/
 build/
 .env
+
+# TLS certificates (generated, contain private keys)
+certs/
+!certs/.gitkeep

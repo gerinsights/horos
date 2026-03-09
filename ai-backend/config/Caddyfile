@@ -1,0 +1,47 @@
+# Caddy reverse proxy — TLS termination with FIPS-compliant ciphers
+#
+# External HTTPS access to:
+#   - /api/*     → ai-service:8000 (FastAPI)
+#   - /orthanc/* → orthanc:8042 (Orthanc REST, if needed externally)
+#   - /mcp/*     → ai-service:3001 (MCP SSE)
+
+{
+	# Use self-signed or provided certs
+	auto_https off
+}
+
+:443 {
+	tls /etc/caddy/certs/server.crt /etc/caddy/certs/server.key {
+		protocols tls1.2 tls1.3
+		ciphers TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+		curves x25519 secp384r1 secp256r1
+	}
+
+	# AI service API
+	handle /api/* {
+		uri strip_prefix /api
+		reverse_proxy ai-service:8000
+	}
+
+	# Orthanc REST API (restricted)
+	handle /orthanc/* {
+		uri strip_prefix /orthanc
+		reverse_proxy orthanc:8042
+	}
+
+	# MCP SSE endpoint
+	handle /mcp/* {
+		uri strip_prefix /mcp
+		reverse_proxy ai-service:3001
+	}
+
+	# Health check
+	handle /health {
+		reverse_proxy ai-service:8000
+	}
+
+	log {
+		output stdout
+		format json
+	}
+}

@@ -134,3 +134,27 @@ async def horos_logs(service: str = "ai", lines: int = 50) -> dict[str, Any]:
 
     # For AI service, return recent log from in-memory buffer
     return {"service": "ai", "note": "Log streaming not yet implemented — check container logs"}
+
+
+async def horos_llm_generate(
+    prompt: str,
+    system: str = "",
+    model: str = "",
+) -> dict[str, Any]:
+    """Generate text using the on-device LLM (Ollama)."""
+    from src.inference.llm import generate, DEFAULT_MODEL
+
+    response = await generate(
+        prompt=prompt,
+        system=system,
+        model=model or DEFAULT_MODEL,
+    )
+    return {"text": response.text, "model": response.model}
+
+
+async def horos_llm_models() -> dict[str, Any]:
+    """List LLM models available in Ollama."""
+    from src.inference.llm import list_models
+
+    models = await list_models()
+    return {"models": models}

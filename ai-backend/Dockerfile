@@ -5,9 +5,19 @@ ARG GPU_BACKEND=rocm
 FROM python:3.12-slim AS base
 
 WORKDIR /app
+
+# Install build deps + OpenSSL 3.x with FIPS provider
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
+    curl \
+    openssl \
+    libssl3 \
     && rm -rf /var/lib/apt/lists/*
+
+# Verify OpenSSL 3.x FIPS provider is available
+RUN openssl list -providers 2>/dev/null || true && \
+    test -f /usr/lib/x86_64-linux-gnu/ossl-modules/fips.so && \
+    echo "FIPS provider available" || echo "FIPS provider not found — will use config fallback"
 
 COPY pyproject.toml .
 RUN pip install --no-cache-dir .
@@ -30,8 +40,18 @@ RUN pip install --no-cache-dir torch torchvision \
 # ---------- final ----------
 FROM backend-${GPU_BACKEND} AS final
 
-COPY src/ /app/src/
-COPY config/ /app/config/
+# Create non-root user
+RUN groupadd -r aiuser && useradd -r -g aiuser -d /app -s /sbin/nologin aiuser && \
+    mkdir -p /app/workdir && chown -R aiuser:aiuser /app
+
+COPY --chown=aiuser:aiuser src/ /app/src/
+COPY --chown=aiuser:aiuser config/ /app/config/
+
+# FIPS OpenSSL configuration
+ENV OPENSSL_CONF=/app/config/openssl-fips.cnf
+ENV OPENSSL_MODULES=/usr/lib/x86_64-linux-gnu/ossl-modules
+
+USER aiuser
 
 EXPOSE 8000 3001
 

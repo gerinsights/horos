@@ -18,12 +18,22 @@ ARCHITECTURE = """
 3. AI_SEGMENT: receives DICOM → runs AI segmentation → sends DICOM SEG + Secondary Capture → PACS_CORE
 4. Horos queries PACS_CORE → sees original series + AI overlays
 
-## AI Server Stack
-- Orthanc (DICOM node, REST API, Lua routing)
-- FastAPI (pipeline orchestration, webhook handler)
+## AI Server Stack (Docker Compose)
+- **Orthanc** — DICOM node, REST API, Lua routing, DICOM TLS
+- **AI Service** (FastAPI) — pipeline orchestration, webhook handler, MCP server
+- **Ollama** — on-device LLM for report generation and study triage
+- **Caddy** — TLS-terminating reverse proxy (FIPS-compliant ciphers)
 - PyTorch + ROCm (GPU inference, GPU-agnostic: ROCm/CUDA/CPU)
 - nnUNet v2 / MONAI (3D segmentation models)
 - highdicom / pydicom (DICOM output generation)
+
+## Security
+- FIPS 140 Level 1 compliant by default
+- OpenSSL 3.x FIPS provider in all containers
+- TLS 1.2+ with ECDHE+AESGCM ciphers only
+- ECDSA P-384 certificates
+- Network segmentation: internal (service-to-service), dicom (PACS), external (HTTPS gateway)
+- Non-root containers, read-only filesystems, no-new-privileges
 """
 
 HOROS_CAPABILITIES = """
@@ -153,6 +163,73 @@ PIPELINE_MRI = """
 | 5 | Lesion (if present) |
 """
 
+SECURITY = """
+# Security Architecture — FIPS 140 Level 1
+
+## Cryptographic Policy
+- **OpenSSL 3.x FIPS provider** activated in all Python/Orthanc containers
+- Config: `config/openssl-fips.cnf` sets `fips=yes` as default property
+- All TLS uses FIPS-approved algorithms only
+
+## TLS Configuration
+- **Minimum protocol**: TLS 1.2
+- **Cipher suites**: ECDHE+AESGCM only (AES-128-GCM, AES-256-GCM)
+- **Key exchange**: ECDHE with P-256, P-384, or X25519
+- **Certificates**: ECDSA P-384 + SHA-384 (generated via `scripts/generate_certs.sh`)
+- **No**: MD5, SHA-1, RC4, DES, 3DES, RSA key exchange
+
+## Network Segmentation (Docker)
+- **internal** network: service-to-service only (no external access)
+- **dicom** network: DICOM TLS port exposed to scanner/PACS network
+- **external** network: HTTPS gateway only
+- Orthanc REST API: internal only (not exposed to host)
+- Ollama API: internal only
+
+## Container Hardening
+- Non-root user (`aiuser`) in AI service
+- `read_only: true` where possible
+- `no-new-privileges` security option
+- Health checks on all services
+- Secrets via environment variables (not baked into images)
+
+## DICOM TLS
+- Orthanc configured with `DicomTlsEnabled: true`
+- Certificates: ECDSA P-384 (same CA as REST TLS)
+- Horos supports TLS via DCMTK (configurable in Preference Panes)
+
+## What FIPS 140 Level 1 Does NOT Require
+- Physical security of the module (that's Level 2+)
+- Tamper-evident seals (Level 2+)
+- Identity-based authentication (Level 3+)
+- Environmental protection (Level 4)
+"""
+
+LLM_INTEGRATION = """
+# LLM Integration (Ollama)
+
+## Architecture
+- Ollama runs as a Docker sidecar service
+- GPU-agnostic: uses same ROCm/CUDA devices as AI segmentation
+- Internal network only — not exposed externally
+- REST API: http://ollama:11434
+
+## Use Cases
+1. **Report generation**: Structured radiology findings from segmentation results
+2. **Study triage**: Natural language classification of study metadata to pipeline routing
+3. **DICOM explanation**: Explain DICOM tags and concepts in clinical context
+4. **Interactive queries**: Answer questions about studies via MCP tools
+
+## Models
+- Default: `llama3.2:3b` (fits in 8GB VRAM alongside segmentation models)
+- Can upgrade to larger models when GPU memory allows
+- Models managed via `ollama pull` / Ollama REST API
+
+## GPU Sharing
+- Segmentation and LLM share the RX 7600 XT GPU
+- Not simultaneous — segmentation runs first, then LLM for report generation
+- Ollama automatically manages VRAM allocation
+"""
+
 # Map of resource URIs to their content
 RESOURCES = {
     "horos://architecture": ("System Architecture", ARCHITECTURE),
@@ -160,4 +237,6 @@ RESOURCES = {
     "horos://dicom-flow": ("DICOM Data Flow", DICOM_FLOW),
     "horos://pipeline/cta": ("CTA Pipeline", PIPELINE_CTA),
     "horos://pipeline/mri": ("MRI Pipeline", PIPELINE_MRI),
+    "horos://security": ("Security & FIPS 140", SECURITY),
+    "horos://llm": ("LLM Integration", LLM_INTEGRATION),
 }

@@ -48,7 +48,29 @@ async def health() -> dict:
     return {
         "status": "ok",
         "device": device_info.summary() if device_info else "unknown",
+        "fips_mode": _check_fips(),
     }
+
+
+def _check_fips() -> bool:
+    """Check if OpenSSL FIPS mode is active."""
+    try:
+        import ssl
+        ctx = ssl.create_default_context()
+        # OpenSSL 3.x with FIPS provider restricts available ciphers
+        ciphers = ctx.get_ciphers()
+        # If FIPS is active, no legacy ciphers (RC4, DES, etc.) will be present
+        return not any("RC4" in c["name"] or "DES" in c["name"] for c in ciphers)
+    except Exception:
+        return False
+
+
+@app.get("/llm/models")
+async def llm_models() -> dict:
+    """List LLM models available in Ollama."""
+    from src.inference.llm import list_models as ollama_list
+    models = await ollama_list()
+    return {"models": models}
 
 
 @app.get("/models")

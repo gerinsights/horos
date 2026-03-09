@@ -20,8 +20,27 @@ dicom:
 
 orthanc:
   url: http://localhost:8042
-  username: orthanc
-  password: orthanc
+  username: ai-service
+  password: change-me-in-env  # Override via ORTHANC_PASSWORD env var
+
+# ── LLM (Ollama) ──
+llm:
+  url: http://ollama:11434
+  default_model: llama3.2:3b       # Small model for report generation
+  report_model: llama3.2:3b        # Can use larger model if VRAM allows
+  triage_model: llama3.2:3b        # Lightweight model for study classification
+  temperature: 0.3
+  max_tokens: 1024
+
+# ── Security ──
+security:
+  fips_mode: true
+  tls:
+    min_protocol: TLSv1.2
+    ciphers: ECDHE+AESGCM
+    cert_path: /app/certs/server.crt
+    key_path: /app/certs/server.key
+    ca_path: /app/certs/ca.crt
 
 models:
   base_path: /app/models

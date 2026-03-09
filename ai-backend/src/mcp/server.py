@@ -107,6 +107,24 @@ TOOL_DEFS = [
             },
         },
     ),
+    Tool(
+        name="horos_llm_generate",
+        description="Generate text using the on-device LLM (Ollama) — for reports, triage, explanations",
+        inputSchema={
+            "type": "object",
+            "properties": {
+                "prompt": {"type": "string", "description": "Prompt for the LLM"},
+                "system": {"type": "string", "description": "Optional system prompt"},
+                "model": {"type": "string", "description": "Ollama model name (default: llama3.2:3b)"},
+            },
+            "required": ["prompt"],
+        },
+    ),
+    Tool(
+        name="horos_llm_models",
+        description="List LLM models available in Ollama on the AI server",
+        inputSchema={"type": "object", "properties": {}},
+    ),
 ]
 
 
@@ -127,6 +145,8 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
         "horos_get_config": tools.horos_get_config,
         "horos_architecture_guide": tools.horos_architecture_guide,
         "horos_logs": tools.horos_logs,
+        "horos_llm_generate": tools.horos_llm_generate,
+        "horos_llm_models": tools.horos_llm_models,
     }
 
     handler = handler_map.get(name)
