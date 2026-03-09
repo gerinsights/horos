@@ -2,9 +2,9 @@ name: Horos CI
 
 on:
   push:
-    branches: [main, master, develop, 'claude/**']
+    branches: [horos, 'claude/**']
   pull_request:
-    branches: [main, master, develop]
+    branches: [horos]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -12,7 +12,6 @@ concurrency:
 
 env:
   DEVELOPER_DIR: /Applications/Xcode.app/Contents/Developer
-  MACOSX_DEPLOYMENT_TARGET: '11.0'
 
 jobs:
   build:
@@ -56,7 +55,13 @@ jobs:
 
       - name: Build
         run: |
-          make Horos CONFIG=${{ matrix.configuration }}
+          xcodebuild -project Horos.xcodeproj \
+            -scheme Horos \
+            -configuration ${{ matrix.configuration }} \
+            -derivedDataPath build \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
 
       - name: Verify binary architecture
         if: success()
@@ -83,8 +88,8 @@ jobs:
 
   lint:
     name: Static Analysis
-    runs-on: macos-14
-    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Checkout
