@@ -42,7 +42,6 @@
 #import "Window3DController.h"
 #import "BrowserController.h"
 #import "VRController.h"
-#import "VRControllerVPRO.h"
 #import "MPR2DController.h"
 #import "OrthogonalMPRViewer.h"
 #import "SRController.h"

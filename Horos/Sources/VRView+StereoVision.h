@@ -95,9 +95,6 @@
 #include "vtkColorTransferFunction.h"
 #include "vtkVolumeProperty.h"
 //#include "vtkVolumeRayCastCompositeFunction.h"
-#include "vtkVolumeRayCastMapper.h"
-#include "vtkVolumeRayCastMIPFunction.h"
-#include "vtkFixedPointVolumeRayCastMapper.h"
 #include "vtkTransform.h"
 #include "vtkSphere.h"
 #include "vtkImplicitBoolean.h"
@@ -123,8 +120,6 @@
 #include "vtkAnnotatedCubeActor.h"
 #include "vtkOrientationMarkerWidget.h"
 //#include "vtkVolumeTextureMapper2D.h"
-#include "vtkVolumeTextureMapper3D.h"
-#include "vtkHorosFixedPointVolumeRayCastMapper.h"
 
 #include "vtkCellArray.h"
 #include "vtkProperty2D.h"
@@ -162,7 +157,6 @@ typedef char* vtkLineWidget;
 typedef char* vtkTextActor;
 typedef char* vtkVolumeRayCastMapper;
 typedef char* vtkFixedPointVolumeRayCastMapper;
-typedef char* vtkHorosFixedPointVolumeRayCastMapper;
 typedef char* vtkVolumeRayCastMIPFunction;
 typedef char* vtkVolume;
 

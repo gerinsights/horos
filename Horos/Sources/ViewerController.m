@@ -46,7 +46,6 @@
 #import "DCMPix.h"
 #import "DicomImage.h"
 #import "VRController.h"
-#import "VRControllerVPRO.h"
 #import "NSSplitViewSave.h"
 #import "SRController.h"
 #import "OsiriXToolbar.h"

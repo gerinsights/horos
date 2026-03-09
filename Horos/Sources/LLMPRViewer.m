@@ -20,7 +20,6 @@
 #import "ITKSegmentation3D.h"
 #import "AppController.h"
 #import "VRController.h"
-#import "VRControllerVPRO.h"
 #import "WaitRendering.h"
 #import "VRView.h"
 #import "Notifications.h"
