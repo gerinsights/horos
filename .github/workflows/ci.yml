@@ -1,0 +1,184 @@
+name: Horos CI
+
+on:
+  push:
+    branches: [main, master, develop, 'claude/**']
+  pull_request:
+    branches: [main, master, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DEVELOPER_DIR: /Applications/Xcode.app/Contents/Developer
+  MACOSX_DEPLOYMENT_TARGET: '11.0'
+
+jobs:
+  build:
+    name: Build Horos
+    runs-on: macos-14  # Apple Silicon (M1) runner
+    timeout-minutes: 120
+
+    strategy:
+      matrix:
+        configuration: [Debug]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Select Xcode
+        run: |
+          # Use latest available Xcode on the runner
+          sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+          xcodebuild -version
+          xcode-select -p
+
+      - name: Show build environment
+        run: |
+          sw_vers
+          clang --version
+          echo "Architecture: $(uname -m)"
+          echo "Available SDKs:"
+          xcodebuild -showsdks | grep macosx
+
+      - name: Cache DerivedData
+        uses: actions/cache@v4
+        with:
+          path: build
+          key: ${{ runner.os }}-deriveddata-${{ matrix.configuration }}-${{ hashFiles('Horos.xcodeproj/project.pbxproj', 'Config.xcconfig') }}
+          restore-keys: |
+            ${{ runner.os }}-deriveddata-${{ matrix.configuration }}-
+
+      - name: Build
+        run: |
+          make Horos CONFIG=${{ matrix.configuration }}
+
+      - name: Verify binary architecture
+        if: success()
+        run: |
+          APP_PATH=$(find build -name "Horos.app" -type d | head -1)
+          if [ -n "$APP_PATH" ]; then
+            echo "Found app at: $APP_PATH"
+            BINARY="$APP_PATH/Contents/MacOS/Horos"
+            if [ -f "$BINARY" ]; then
+              echo "Binary architectures:"
+              lipo -info "$BINARY"
+              echo ""
+              echo "Binary type:"
+              file "$BINARY"
+            else
+              echo "Binary not found at expected path"
+              find "$APP_PATH/Contents/MacOS/" -type f 2>/dev/null || true
+            fi
+          else
+            echo "Horos.app not found in build directory"
+            echo "Build directory contents:"
+            find build -maxdepth 4 -name "*.app" 2>/dev/null || true
+          fi
+
+  lint:
+    name: Static Analysis
+    runs-on: macos-14
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: false  # Don't need submodules for linting
+          fetch-depth: 1
+
+      - name: Check for deprecated API suppressions
+        run: |
+          echo "=== Checking for pragma deprecation suppressions ==="
+          SUPPRESSIONS=$(grep -rn '#pragma clang diagnostic ignored "-Wdeprecated' \
+            --include="*.m" --include="*.mm" --include="*.h" \
+            Horos/Sources/ DCM\ Framework/ Nitrogen/ 2>/dev/null || true)
+
+          if [ -n "$SUPPRESSIONS" ]; then
+            echo "::warning::Found deprecated API warning suppressions (technical debt):"
+            echo "$SUPPRESSIONS" | head -30
+            COUNT=$(echo "$SUPPRESSIONS" | wc -l | tr -d ' ')
+            echo ""
+            echo "Total suppression sites: $COUNT"
+          else
+            echo "No deprecated API suppressions found."
+          fi
+
+      - name: Check for OSSpinLock usage
+        run: |
+          echo "=== Checking for unsafe OSSpinLock usage ==="
+          SPINLOCKS=$(grep -rn 'OSSpinLock' \
+            --include="*.m" --include="*.mm" --include="*.h" --include="*.c" \
+            Horos/Sources/ DCM\ Framework/ Nitrogen/ 2>/dev/null || true)
+
+          if [ -n "$SPINLOCKS" ]; then
+            echo "::error::Found OSSpinLock usage (thread-safety bug - priority inversion):"
+            echo "$SPINLOCKS"
+            echo ""
+            echo "Replace with os_unfair_lock. See MODERNIZATION_SPRINT_PLAN.md Sprint 1.1"
+            # Warn but don't fail — this is existing technical debt
+          else
+            echo "No OSSpinLock usage found."
+          fi
+
+      - name: Check for OpenGL usage count
+        run: |
+          echo "=== OpenGL migration progress ==="
+          GL_COUNT=$(grep -rn 'glBegin\|glEnd\|glVertex\|glColor\|glEnable\|glDisable\|glClear\b\|glDraw\|NSOpenGLView\|NSOpenGLContext' \
+            --include="*.m" --include="*.mm" --include="*.h" \
+            Horos/Sources/ 2>/dev/null | wc -l | tr -d ' ')
+          echo "OpenGL references remaining in Horos/Sources: $GL_COUNT"
+
+          if [ "$GL_COUNT" -eq 0 ]; then
+            echo "OpenGL migration complete!"
+          else
+            echo "::notice::OpenGL references remain — see MODERNIZATION_SPRINT_PLAN.md Phase 2"
+          fi
+
+      - name: Check for Metal adoption
+        run: |
+          echo "=== Metal adoption progress ==="
+          METAL_COUNT=$(grep -rn 'MTLDevice\|MTKView\|MTLCommandQueue\|CAMetalLayer\|import Metal' \
+            --include="*.m" --include="*.mm" --include="*.h" --include="*.swift" \
+            Horos/Sources/ 2>/dev/null | wc -l | tr -d ' ')
+          echo "Metal references in Horos/Sources: $METAL_COUNT"
+
+      - name: Modernization debt summary
+        run: |
+          echo "=== Modernization Debt Summary ==="
+          echo ""
+
+          for PATTERN in "NSCalendarDate" "Gestalt(" "FSRef\b" "#import <Carbon" "NSURLConnection" "WebView\b"; do
+            COUNT=$(grep -rn "$PATTERN" \
+              --include="*.m" --include="*.mm" --include="*.h" \
+              Horos/Sources/ 2>/dev/null | wc -l | tr -d ' ')
+            printf "%-30s %s occurrences\n" "$PATTERN" "$COUNT"
+          done
+
+  submodule-versions:
+    name: Submodule Version Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+          fetch-depth: 1
+
+      - name: Report pinned submodule commits
+        run: |
+          echo "=== Pinned Submodule Versions ==="
+          echo ""
+          git submodule status --cached | while read -r hash path rest; do
+            # Strip leading +/- if present
+            hash=$(echo "$hash" | sed 's/^[+-]//')
+            printf "%-20s %s\n" "$path" "${hash:0:12}"
+          done
