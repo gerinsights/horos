@@ -252,14 +252,22 @@ static NSRecursiveLock *lockFile = nil;
 	SecExternalItemType itemType = kSecItemTypeUnknown;
 
 
-	OSStatus err = 0;
+	SecKeychainRef keychain = NULL;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+	OSStatus err = SecKeychainCopyDefault(&keychain);
+#pragma clang diagnostic pop
+	if (err != errSecSuccess) {
+		NSLog(@"createNewIdentity: SecKeychainCopyDefault failed: %@", [DDKeychain stringForError:err]);
+	}
+
 	err = SecItemImport((CFDataRef)certData,   // CFDataRef importedData
 						NULL,                  // CFStringRef fileNameOrExtension
 						&inputFormat,          // SecExternalFormat *inputFormat
 						&itemType,             // SecExternalItemType *itemType
 						0,                     // SecItemImportExportFlags flags (Unused)
 						&importParameters,     // const SecItemImportExportKeyParameters *keyParams
-						NULL,                  // SecKeychainRef importKeychain (NULL = default)
+						keychain,              // SecKeychainRef importKeychain
 						&outItems);            // CFArrayRef *outItems
 
 	NSLog(@"OSStatus: %i", (int) err);
@@ -281,7 +289,7 @@ static NSRecursiveLock *lockFile = nil;
 	[[NSFileManager defaultManager] removeItemAtPath:certWrapperPath error:NULL];
 	
 	// Don't forget to release anything we may have created
-	// (keychain ref removed — SecItemImport(NULL) uses default keychain)
+	if(keychain)   CFRelease(keychain);
 	if(outItems)   CFRelease(outItems);
 }
 
@@ -613,7 +621,11 @@ static NSRecursiveLock *lockFile = nil;
 		(__bridge CFTypeRef)@[(__bridge id)certRef], sslPolicy, &trust);
 	if (status == errSecSuccess && trust) {
 		CFErrorRef evalError = NULL;
-		SecTrustEvaluateWithError(trust, &evalError);
+		bool trusted = SecTrustEvaluateWithError(trust, &evalError);
+		if (!trusted) {
+			NSLog(@"KeychainAccessCertificateChainForIdentity: trust evaluation failed: %@",
+				  evalError ? (__bridge NSError *)evalError : nil);
+		}
 		if (evalError) CFRelease(evalError);
 
 		CFArrayRef chain = SecTrustCopyCertificateChain(trust);
