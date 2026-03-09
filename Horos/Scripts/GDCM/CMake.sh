@@ -53,6 +53,8 @@ openjpeg_include="$openjpeg_install/include/openjpeg-2.5"
 if [ ! -d "$openjpeg_include" ]; then
     openjpeg_include="$openjpeg_install/include/openjpeg-2.3"
 fi
+# Pass cmake config dir so GDCM find_package(OpenJPEG) works without pkg-config
+args+=(-DOpenJPEG_DIR="$openjpeg_install/lib/cmake/openjpeg-2.5")
 args+=(-DOPENJPEG_LIBRARIES="$openjpeg_install/lib/libopenjp2.a")
 args+=(-DOPENJPEG_INCLUDE_DIRS="$openjpeg_include")
 
