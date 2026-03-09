@@ -44,16 +44,14 @@ args+=(-DGDCM_DOCUMENTATION=OFF)
 args+=(-DGDCM_BUILD_TESTING=OFF)
 args+=(-DGDCM_BUILD_DOCBOOK_MANPAGES=OFF)
 
-args+=(-DGDCM_USE_SYSTEM_OPENJPEG=ON)
-
-args+=(-DCMAKE_IGNORE_PATH="/opt/local/include;/opt/local/lib")
-
 openjpeg_install="$CONFIGURATION_TEMP_DIR/OpenJPEG.build/Install"
 openjpeg_include="$openjpeg_install/include/openjpeg-2.5"
 if [ ! -d "$openjpeg_include" ]; then
     openjpeg_include="$openjpeg_install/include/openjpeg-2.3"
 fi
-# Pass cmake config dir so GDCM find_package(OpenJPEG) works without pkg-config
+# Expose our locally-built OpenJPEG to both pkg-config and cmake find_package
+export PKG_CONFIG_PATH="$openjpeg_install/lib/pkgconfig:$PKG_CONFIG_PATH"
+args+=(-DGDCM_USE_SYSTEM_OPENJPEG=ON)
 args+=(-DOpenJPEG_DIR="$openjpeg_install/lib/cmake/openjpeg-2.5")
 args+=(-DOPENJPEG_LIBRARIES="$openjpeg_install/lib/libopenjp2.a")
 args+=(-DOPENJPEG_INCLUDE_DIRS="$openjpeg_include")
