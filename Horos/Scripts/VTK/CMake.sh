@@ -56,9 +56,10 @@ args+=(-DVTK_MODULE_USE_EXTERNAL_VTK_libxml2=ON)
 
 [ "$CONFIGURATION" == 'Release' ] && args+=( -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS_RELEASE=-O3 )
 
-# VTK 9: disable all groups, then explicitly enable only required modules
-args+=(-DVTK_GROUP_ENABLE_StandAlone=NO)
-args+=(-DVTK_GROUP_ENABLE_Rendering=NO)
+# VTK 9: suppress groups by default but allow transitive deps to pull them in.
+# Use DONT_WANT (not NO) so dependency resolution can enable required sub-modules.
+args+=(-DVTK_GROUP_ENABLE_StandAlone=DONT_WANT)
+args+=(-DVTK_GROUP_ENABLE_Rendering=DONT_WANT)
 args+=(-DVTK_MODULE_ENABLE_VTK_RenderingOpenGL2=YES)
 args+=(-DVTK_MODULE_ENABLE_VTK_RenderingVolumeOpenGL2=YES)
 args+=(-DVTK_MODULE_ENABLE_VTK_RenderingAnnotation=YES)
