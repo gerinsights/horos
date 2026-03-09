@@ -159,8 +159,7 @@
 		4307C62C1A2091900083877C /* url.h in Headers */ = {isa = PBXBuildFile; fileRef = 4307C62B1A2091900083877C /* url.h */; };
 		433F9A801A1B18A500E52C6C /* VTKView.mm in Sources */ = {isa = PBXBuildFile; fileRef = 433F9A7E1A1B18A500E52C6C /* VTKView.mm */; };
 		433F9A811A1B18A500E52C6C /* VTKView.h in Headers */ = {isa = PBXBuildFile; fileRef = 433F9A7F1A1B18A500E52C6C /* VTKView.h */; };
-		433F9A891A1B7C1C00E52C6C /* vtkHorosFixedPointVolumeRayCastMapper.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 433F9A871A1B7C1C00E52C6C /* vtkHorosFixedPointVolumeRayCastMapper.cxx */; };
-		433F9A8A1A1B7C1C00E52C6C /* vtkHorosFixedPointVolumeRayCastMapper.h in Headers */ = {isa = PBXBuildFile; fileRef = 433F9A881A1B7C1C00E52C6C /* vtkHorosFixedPointVolumeRayCastMapper.h */; };
+
 		434499B21A1D70840047F0F2 /* options.h in Headers */ = {isa = PBXBuildFile; fileRef = 434B46151A19F2A3008CF8CF /* options.h */; };
 		434B46161A19F2E5008CF8CF /* options.h in Headers */ = {isa = PBXBuildFile; fileRef = 434B46151A19F2A3008CF8CF /* options.h */; };
 		434B46191A19F322008CF8CF /* options.h in Headers */ = {isa = PBXBuildFile; fileRef = 434B46151A19F2A3008CF8CF /* options.h */; };
@@ -666,8 +665,7 @@
 		9952F2722020C21D0020CCD4 /* ICloudDriveDetector.m in Sources */ = {isa = PBXBuildFile; fileRef = 9952F2702020C21D0020CCD4 /* ICloudDriveDetector.m */; };
 		9953013E1CE8B03800B3FB2C /* ofthread.cc in Sources */ = {isa = PBXBuildFile; fileRef = BFBF3E6709B6828B00545F5E /* ofthread.cc */; };
 		9953013F1CE8B06D00B3FB2C /* ofstring.cc in Sources */ = {isa = PBXBuildFile; fileRef = BFBF3E6509B6828B00545F5E /* ofstring.cc */; };
-		9953FE521BF540D000BD0DA6 /* vtkHorosFixedPointVolumeRayCastMIPHelper.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 9953FE4E1BF540D000BD0DA6 /* vtkHorosFixedPointVolumeRayCastMIPHelper.cxx */; };
-		9953FE531BF540D000BD0DA6 /* vtkHorosFixedPointVolumeRayCastMIPHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = 9953FE4F1BF540D000BD0DA6 /* vtkHorosFixedPointVolumeRayCastMIPHelper.h */; };
+
 		99645870211507A000A6EDD1 /* Splash in Resources */ = {isa = PBXBuildFile; fileRef = 9964586F2115079F00A6EDD1 /* Splash */; };
 		9966A1A11AE09D3F00F2D81A /* AddressBook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9966A1A01AE09D3F00F2D81A /* AddressBook.framework */; };
 		9966A1A31AE09D4800F2D81A /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9966A1A21AE09D4800F2D81A /* AVFoundation.framework */; };
@@ -3354,8 +3352,7 @@
 		4307C62B1A2091900083877C /* url.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = url.h; sourceTree = "<group>"; };
 		433F9A7E1A1B18A500E52C6C /* VTKView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = VTKView.mm; sourceTree = "<group>"; };
 		433F9A7F1A1B18A500E52C6C /* VTKView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VTKView.h; sourceTree = "<group>"; };
-		433F9A871A1B7C1C00E52C6C /* vtkHorosFixedPointVolumeRayCastMapper.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vtkHorosFixedPointVolumeRayCastMapper.cxx; sourceTree = "<group>"; };
-		433F9A881A1B7C1C00E52C6C /* vtkHorosFixedPointVolumeRayCastMapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vtkHorosFixedPointVolumeRayCastMapper.h; sourceTree = "<group>"; };
+
 		434B46151A19F2A3008CF8CF /* options.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = options.h; sourceTree = "<group>"; };
 		434B461B1A19F631008CF8CF /* OPJSupport.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OPJSupport.cpp; sourceTree = "<group>"; };
 		434B461C1A19F631008CF8CF /* OPJSupport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OPJSupport.h; sourceTree = "<group>"; };
@@ -3866,8 +3863,7 @@
 		9952F26D2020C1010020CCD4 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/ICloudDriveDetector.xib; sourceTree = "<group>"; };
 		9952F26F2020C21D0020CCD4 /* ICloudDriveDetector.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ICloudDriveDetector.h; sourceTree = "<group>"; };
 		9952F2702020C21D0020CCD4 /* ICloudDriveDetector.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ICloudDriveDetector.m; sourceTree = "<group>"; };
-		9953FE4E1BF540D000BD0DA6 /* vtkHorosFixedPointVolumeRayCastMIPHelper.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vtkHorosFixedPointVolumeRayCastMIPHelper.cxx; sourceTree = "<group>"; };
-		9953FE4F1BF540D000BD0DA6 /* vtkHorosFixedPointVolumeRayCastMIPHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vtkHorosFixedPointVolumeRayCastMIPHelper.h; sourceTree = "<group>"; };
+
 		9964586F2115079F00A6EDD1 /* Splash */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Splash; path = Binaries/Splash; sourceTree = SOURCE_ROOT; };
 		9966A1A01AE09D3F00F2D81A /* AddressBook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AddressBook.framework; path = System/Library/Frameworks/AddressBook.framework; sourceTree = SDKROOT; };
 		9966A1A21AE09D4800F2D81A /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
@@ -6921,10 +6917,6 @@
 		AB6AC6650624AC5C00AFC7AF /* VR/MIP 3D */ = {
 			isa = PBXGroup;
 			children = (
-				9953FE4F1BF540D000BD0DA6 /* vtkHorosFixedPointVolumeRayCastMIPHelper.h */,
-				9953FE4E1BF540D000BD0DA6 /* vtkHorosFixedPointVolumeRayCastMIPHelper.cxx */,
-				433F9A881A1B7C1C00E52C6C /* vtkHorosFixedPointVolumeRayCastMapper.h */,
-				433F9A871A1B7C1C00E52C6C /* vtkHorosFixedPointVolumeRayCastMapper.cxx */,
 				433F9A7E1A1B18A500E52C6C /* VTKView.mm */,
 				433F9A7F1A1B18A500E52C6C /* VTKView.h */,
 				AB6AC6420624AC5200AFC7AF /* VRView.h */,
@@ -9229,7 +9221,7 @@
 				BFBF3FA709B6828D00545F5E /* djdijg16.h in Headers */,
 				BFBF3FA909B6828D00545F5E /* djdijg8.h in Headers */,
 				BFBF3FAB09B6828D00545F5E /* djeijg12.h in Headers */,
-				9953FE531BF540D000BD0DA6 /* vtkHorosFixedPointVolumeRayCastMIPHelper.h in Headers */,
+
 				BFBF3FAD09B6828D00545F5E /* djeijg16.h in Headers */,
 				BFBF3FAF09B6828D00545F5E /* djeijg8.h in Headers */,
 				BFBF3FB009B6828D00545F5E /* djencabs.h in Headers */,
@@ -9383,7 +9375,7 @@
 				BFBF41CC09B6828D00545F5E /* dsrtree.h in Headers */,
 				BFBF41CE09B6828D00545F5E /* dsrtypes.h in Headers */,
 				BFBF41D009B6828D00545F5E /* dsruidtn.h in Headers */,
-				433F9A8A1A1B7C1C00E52C6C /* vtkHorosFixedPointVolumeRayCastMapper.h in Headers */,
+
 				BFBF41D209B6828D00545F5E /* dsrwavch.h in Headers */,
 				BFBF41D409B6828D00545F5E /* dsrwavtn.h in Headers */,
 				BFBF41D609B6828D00545F5E /* dsrwavvl.h in Headers */,
@@ -11099,7 +11091,7 @@
 				CE6E2CB906CAE45A00BC7907 /* PlotView.m in Sources */,
 				CE74456A06DBA4CB0034D05E /* ITK.mm in Sources */,
 				CE4A922D06DBF255006DAAF7 /* ITKSegmentation3D.mm in Sources */,
-				433F9A891A1B7C1C00E52C6C /* vtkHorosFixedPointVolumeRayCastMapper.cxx in Sources */,
+
 				CE26442306DCF096007F5B71 /* ITKSegmentation3DController.m in Sources */,
 				BF00C95D06F3F43A00715191 /* DCMCursor.m in Sources */,
 				7ECB4B42072EF9F800C2CFC4 /* DCMCalendarScript.m in Sources */,
@@ -11137,7 +11129,7 @@
 				A9F6E4C708FEAF7F0060285A /* OrthogonalMPRView.m in Sources */,
 				A9F6E4D108FEAFB20060285A /* OrthogonalMPRController.m in Sources */,
 				A9F6E4DB08FEAFE50060285A /* OrthogonalMPRViewer.m in Sources */,
-				9953FE521BF540D000BD0DA6 /* vtkHorosFixedPointVolumeRayCastMIPHelper.cxx in Sources */,
+
 				A9F6E4F508FEB0510060285A /* OrthogonalMPRPETCTView.m in Sources */,
 				A9F6E4FF08FEB0740060285A /* OrthogonalMPRPETCTController.m in Sources */,
 				A9F6E50908FEB09D0060285A /* OrthogonalMPRPETCTViewer.m in Sources */,

@@ -3,7 +3,7 @@
  
  Horos is free software: you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by
- the Free Software Foundation, Êversion 3 of the License.
+ the Free Software Foundation, ï¿½version 3 of the License.
  
  The Horos Project was based originally upon the OsiriX Project which at the time of
  the code fork was licensed as a LGPL project.  However, not all of the the source-code
@@ -15,24 +15,24 @@
  
  Horos is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY EXPRESS OR IMPLIED, INCLUDING ANY WARRANTY OF
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE OR USE. ÊSee the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE OR USE. ï¿½See the
  GNU Lesser General Public License for more details.
  
  You should have received a copy of the GNU Lesser General Public License
- along with Horos. ÊIf not, see http://www.gnu.org/licenses/lgpl.html
+ along with Horos. ï¿½If not, see http://www.gnu.org/licenses/lgpl.html
  
  Prior versions of this file were published by the OsiriX team pursuant to
  the below notice and licensing protocol.
  ============================================================================
- Program: Ê OsiriX
- ÊCopyright (c) OsiriX Team
- ÊAll rights reserved.
- ÊDistributed under GNU - LGPL
- Ê
- ÊSee http://www.osirix-viewer.com/copyright.html for details.
- Ê Ê This software is distributed WITHOUT ANY WARRANTY; without even
- Ê Ê the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
- Ê Ê PURPOSE.
+ Program: ï¿½ OsiriX
+ ï¿½Copyright (c) OsiriX Team
+ ï¿½All rights reserved.
+ ï¿½Distributed under GNU - LGPL
+ ï¿½
+ ï¿½See http://www.osirix-viewer.com/copyright.html for details.
+ ï¿½ ï¿½ This software is distributed WITHOUT ANY WARRANTY; without even
+ ï¿½ ï¿½ the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ ï¿½ ï¿½ PURPOSE.
  ============================================================================*/
 
 #import "options.h"
@@ -44,8 +44,6 @@
 #endif
 
 #import "VRView.h"
-
-#import "vtkHorosFixedPointVolumeRayCastMapper.h"
 
 #import "DCMCursor.h"
 #import "AppController.h"
@@ -132,7 +130,7 @@ extern "C"
 //#define BONEVALUE 250
 #define BONEOPACITY 1.1
 
-extern int dontRenderVolumeRenderingOsiriX;	// See vtkHorosFixedPointVolumeRayCastMapper.cxx
+extern int dontRenderVolumeRenderingOsiriX;	// VTK9: move to vtkSmartVolumeMapper (issue #16)
 extern unsigned int minimumStep;
 
 static NSRecursiveLock *drawLock = nil;

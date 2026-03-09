@@ -124,7 +124,6 @@
 #include "vtkOrientationMarkerWidget.h"
 //#include "vtkVolumeTextureMapper2D.h"
 #include "vtkVolumeTextureMapper3D.h"
-#include "vtkHorosFixedPointVolumeRayCastMapper.h"
 
 #include "vtkCellArray.h"
 #include "vtkProperty2D.h"
@@ -162,7 +161,6 @@ typedef char* vtkLineWidget;
 typedef char* vtkTextActor;
 typedef char* vtkVolumeRayCastMapper;
 typedef char* vtkFixedPointVolumeRayCastMapper;
-typedef char* vtkHorosFixedPointVolumeRayCastMapper;
 typedef char* vtkVolumeRayCastMIPFunction;
 typedef char* vtkVolume;
 
