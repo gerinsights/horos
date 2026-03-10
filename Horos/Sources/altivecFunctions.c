@@ -53,8 +53,6 @@
 
 #include "altivecFunctions.h"
 
-#include "altivecFunctions.h"
-
 void vmax8ARM( vUInt8 *a, vUInt8 *b, vUInt8 *r, long size)
 {
 long i = size/4;

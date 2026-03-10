@@ -36,6 +36,8 @@
  ============================================================================*/
 #import "ThickSlabVR.h"
 
+@implementation ThickSlabVR
+
 -(void) dealloc
 {
 	NSLog( @"ThickSlabVR");
