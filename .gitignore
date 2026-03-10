@@ -13,6 +13,7 @@ xcuserdata
 *.moved-aside
 *.xcsettings
 __MACOSX
+.venv/
 
 DICOMPrint/xercesc
 DICOMPrint/libxerces-c.27.dylib

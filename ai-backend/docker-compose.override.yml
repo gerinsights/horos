@@ -1,0 +1,32 @@
+# ROCm GPU passthrough for AMD GPUs
+# This file is automatically loaded by docker compose alongside docker-compose.yml.
+#
+# Set HSA_OVERRIDE_GFX_VERSION in your .env file for your specific GPU:
+#   11.0.2 = RX 7600 XT (RDNA 3)
+#   10.3.0 = RX 6700 XT (RDNA 2)
+#   9.0.6  = MI100
+#   (leave empty for auto-detect)
+#
+# For CUDA: copy docker-compose.cuda.yml to docker-compose.override.yml
+# For CPU-only: delete this file
+services:
+  ai-service:
+    devices:
+      - /dev/kfd
+      - /dev/dri
+    group_add:
+      - video
+      - render
+    environment:
+      - HSA_OVERRIDE_GFX_VERSION=${HSA_OVERRIDE_GFX_VERSION:-}
+
+  ollama:
+    devices:
+      - /dev/kfd
+      - /dev/dri
+    group_add:
+      - video
+      - render
+    environment:
+      - HSA_OVERRIDE_GFX_VERSION=${HSA_OVERRIDE_GFX_VERSION:-}
+      - OLLAMA_GPU_DRIVER=rocm

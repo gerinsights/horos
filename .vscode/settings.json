@@ -1,0 +1,17 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+  "files.associations": {
+    "*.mm": "objective-cpp",
+    "*.h": "objective-c"
+  },
+  "files.exclude": {
+    "**/.venv": true
+  },
+  "search.exclude": {
+    "**/.venv": true
+  },
+  "clangd.arguments": [
+    "--background-index",
+    "--header-insertion=never"
+  ]
+}

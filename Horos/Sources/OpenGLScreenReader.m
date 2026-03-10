@@ -203,8 +203,6 @@
 		
 		// Specify attributes of the GL graphics context
 		NSOpenGLPixelFormatAttribute attributes[] = {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
             NSOpenGLPFAFullScreen,
 #pragma clang diagnostic pop
             NSOpenGLPFAScreenMask,
@@ -235,8 +233,6 @@
         // Set our context as the current OpenGL context
         [mGLContext makeCurrentContext];
         // Set full-screen mode
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
         [mGLContext setFullScreen];
 #pragma clang diagnostic pop
 

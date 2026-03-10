@@ -158,7 +158,7 @@
 			SecIdentityRef identity = [[SFChooseIdentityPanel sharedChooseIdentityPanel] identity];
 			if(identity)
 			{
-				[DDKeychain KeychainAccessSetPreferredIdentity:identity forName:[self UniqueLabelForSelectedServer] keyUse:CSSM_KEYUSE_ANY];
+				[DDKeychain KeychainAccessSetPreferredIdentity:identity forName:[self UniqueLabelForSelectedServer] keyUse:0];
 				[self getTLSCertificate];
 			}
 		}

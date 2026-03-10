@@ -48,8 +48,6 @@
     NSString* colorSpaceName = [self colorSpaceName];
 	if ([colorSpaceName isEqualToString:NSCalibratedWhiteColorSpace] ||
         [colorSpaceName isEqualToString:NSDeviceWhiteColorSpace] ||
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
         [colorSpaceName isEqualToString:NSCalibratedBlackColorSpace] ||
         [colorSpaceName isEqualToString:NSDeviceBlackColorSpace])
 #pragma clang diagnostic pop

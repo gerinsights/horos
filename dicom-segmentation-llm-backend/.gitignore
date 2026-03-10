@@ -1,0 +1,18 @@
+models/*.pt
+models/*.pth
+models/*.onnx
+models/*.bin
+models/nnunet/
+models/monai/
+!models/.gitkeep
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+dist/
+build/
+.env
+
+# TLS certificates (generated, contain private keys)
+certs/
+!certs/.gitkeep

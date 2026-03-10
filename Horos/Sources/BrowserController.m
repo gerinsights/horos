@@ -11492,10 +11492,7 @@ constrainSplitPosition:(CGFloat)proposedPosition
 
 + (NSArray<NSString *> *)DatabaseObjectXIDsPasteboardTypes {
     return @[O2PasteboardTypeDatabaseObjectXIDs,
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
              O2DatabaseXIDsDragType
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
              ];
 }
 
@@ -14281,8 +14278,6 @@ static NSArray*	openSubSeriesArray = nil;
             [[albumTable tableColumnWithIdentifier:@"Source"] setDataCell:cell];
             [albumTable setDelegate:self];
             [albumTable registerForDraggedTypes:[BrowserController.DatabaseObjectXIDsPasteboardTypes arrayByAddingObjectsFromArray:@[
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
                                                   O2AlbumDragType // we still support the original, non-UTI type, in case some plugin uses this (very unlikely)
 #pragma clang diagnostic pop
                                                   ]]];

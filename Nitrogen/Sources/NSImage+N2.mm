@@ -76,8 +76,6 @@
 
 -(void)setSize:(NSSize)size {
 	NSSize oldSize = [self size];
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     if (![self scalesWhenResized])
 #pragma clang diagnostic pop
 		_inchSize = NSMakeSize(_inchSize.width/oldSize.width*size.width, _inchSize.height/oldSize.height*size.height);

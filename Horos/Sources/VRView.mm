@@ -3,7 +3,7 @@
  
  Horos is free software: you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by
- the Free Software Foundation, Êversion 3 of the License.
+ the Free Software Foundation, ï¿½version 3 of the License.
  
  The Horos Project was based originally upon the OsiriX Project which at the time of
  the code fork was licensed as a LGPL project.  However, not all of the the source-code
@@ -15,24 +15,24 @@
  
  Horos is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY EXPRESS OR IMPLIED, INCLUDING ANY WARRANTY OF
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE OR USE. ÊSee the
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE OR USE. ï¿½See the
  GNU Lesser General Public License for more details.
  
  You should have received a copy of the GNU Lesser General Public License
- along with Horos. ÊIf not, see http://www.gnu.org/licenses/lgpl.html
+ along with Horos. ï¿½If not, see http://www.gnu.org/licenses/lgpl.html
  
  Prior versions of this file were published by the OsiriX team pursuant to
  the below notice and licensing protocol.
  ============================================================================
- Program: Ê OsiriX
- ÊCopyright (c) OsiriX Team
- ÊAll rights reserved.
- ÊDistributed under GNU - LGPL
- Ê
- ÊSee http://www.osirix-viewer.com/copyright.html for details.
- Ê Ê This software is distributed WITHOUT ANY WARRANTY; without even
- Ê Ê the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
- Ê Ê PURPOSE.
+ Program: ï¿½ OsiriX
+ ï¿½Copyright (c) OsiriX Team
+ ï¿½All rights reserved.
+ ï¿½Distributed under GNU - LGPL
+ ï¿½
+ ï¿½See http://www.osirix-viewer.com/copyright.html for details.
+ ï¿½ ï¿½ This software is distributed WITHOUT ANY WARRANTY; without even
+ ï¿½ ï¿½ the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+ ï¿½ ï¿½ PURPOSE.
  ============================================================================*/
 
 #import "options.h"
@@ -44,8 +44,6 @@
 #endif
 
 #import "VRView.h"
-
-#import "vtkHorosFixedPointVolumeRayCastMapper.h"
 
 #import "DCMCursor.h"
 #import "AppController.h"
@@ -79,7 +77,6 @@
 #include <vtkWorldPointPicker.h>
 //#include <vtkOpenGLVolumeTextureMapper3D.h>
 #include <vtkPropAssembly.h>
-#include <vtkFixedPointRayCastImage.h>
 #include <vtkSmartVolumeMapper.h>
 #include <vtkSphereSource.h>
 #include <vtkAssemblyPath.h>
@@ -132,7 +129,7 @@ extern "C"
 //#define BONEVALUE 250
 #define BONEOPACITY 1.1
 
-extern int dontRenderVolumeRenderingOsiriX;	// See vtkHorosFixedPointVolumeRayCastMapper.cxx
+int dontRenderVolumeRenderingOsiriX = 0;	// VTK9: move to vtkSmartVolumeMapper (issue #16)
 extern unsigned int minimumStep;
 
 static NSRecursiveLock *drawLock = nil;
@@ -928,7 +925,7 @@ public:
 {
     if( volumeMapper == nil)
     {
-        volumeMapper = vtkHorosFixedPointVolumeRayCastMapper::New();
+        volumeMapper = vtkSmartVolumeMapper::New();
         volumeMapper->SetInputConnection(reader->GetOutputPort());
     }
     
@@ -1071,7 +1068,7 @@ public:
         case 0:		// RAY CAST
             if( blendingVolumeMapper == nil)
             {
-                blendingVolumeMapper = vtkHorosFixedPointVolumeRayCastMapper::New();
+                blendingVolumeMapper = vtkSmartVolumeMapper::New();
                 blendingVolumeMapper->SetInputConnection(blendingReader->GetOutputPort());
                 
             }
@@ -1374,7 +1371,7 @@ public:
                 double r = 1.0;
                 
                 if( volumeMapper)
-                    r = volumeMapper->GetRayCastImage()->GetImageSampleDistance();
+                    r = volumeMapper->GetImageSampleDistance();
                 
                 [exportDCM setPixelSpacing: [self getResolution]*r :[self getResolution]*r];
             }
@@ -2223,7 +2220,6 @@ public:
         aRenderer->SetDraw( 0);
         
         dontRenderVolumeRenderingOsiriX = 0;
-        volumeMapper->SetIntermixIntersectingGeometry( 0);
         
         _cocoaRenderWindow->UpdateContext();
         _cocoaRenderWindow->MakeCurrent();
@@ -2240,7 +2236,6 @@ public:
         aRenderer->SetDraw( 0);
         
         dontRenderVolumeRenderingOsiriX = 0;
-        blendingVolumeMapper->SetIntermixIntersectingGeometry( 0);
         
         _cocoaRenderWindow->UpdateContext();
         _cocoaRenderWindow->MakeCurrent();
@@ -2470,7 +2465,7 @@ public:
 - (float) blendingImageSampleDistance
 {
     if( blendingVolumeMapper)
-        return blendingVolumeMapper->GetRayCastImage()->GetImageSampleDistance();
+        return blendingVolumeMapper->GetImageSampleDistance();
     else
         return 0;
 }
@@ -2478,7 +2473,7 @@ public:
 - (float) imageSampleDistance
 {
     if( volumeMapper)
-        return volumeMapper->GetRayCastImage()->GetImageSampleDistance();
+        return volumeMapper->GetImageSampleDistance();
     else
         return 0;
 }
@@ -2515,14 +2510,6 @@ public:
         cameraPosition[ 1] /= factor;
         cameraPosition[ 2] /= factor;
         
-        vtkFixedPointRayCastImage *rayCastImage = nil;
-        
-        if( blendedView) rayCastImage = blendingVolumeMapper->GetRayCastImage();
-        else rayCastImage = volumeMapper->GetRayCastImage();
-        
-        int size[2];
-        rayCastImage->GetImageInUseSize( size);
-        
         // Position of upper left part of the image
         
         double *viewport = aRenderer->GetViewport();
@@ -2533,23 +2520,16 @@ public:
         
         double sampleDistance = 0;
         
-        if( blendedView) sampleDistance = blendingVolumeMapper->GetRayCastImage()->GetImageSampleDistance();
-        else sampleDistance = volumeMapper->GetRayCastImage()->GetImageSampleDistance();
+        if( blendedView) sampleDistance = blendingVolumeMapper->GetImageSampleDistance();
+        else sampleDistance = volumeMapper->GetImageSampleDistance();
         
-        // turn ImageOrigin into (x1,y1) in window (not viewport!) coordinates.
+        // vtkSmartVolumeMapper renders to full window; origin is always (0,0).
         int imageOrigin[2];
         int imageInUseSize[2];
         
-        if( blendedView)
-        {
-            blendingVolumeMapper->GetRayCastImage()->GetImageOrigin( imageOrigin);
-            blendingVolumeMapper->GetRayCastImage()->GetImageInUseSize( imageInUseSize);
-        }
-        else
-        {
-            volumeMapper->GetRayCastImage()->GetImageOrigin( imageOrigin);
-            volumeMapper->GetRayCastImage()->GetImageInUseSize( imageInUseSize);
-        }
+        imageOrigin[0] = imageOrigin[1] = 0;
+        imageInUseSize[0] = renWinSize[0];
+        imageInUseSize[1] = renWinSize[1];
         
         x1 = static_cast<int> ( viewport[0] * static_cast<double>(renWinSize[0]) + static_cast<double>(imageOrigin[0]) * sampleDistance);
         y1 = static_cast<int> ( viewport[1] * static_cast<double>(renWinSize[1]) + static_cast<double>(imageOrigin[1]) * sampleDistance);
@@ -2771,8 +2751,7 @@ public:
                 float *pixels = [self imageInFullDepthWidth: &width height: &height isRGB: &rgb];
                 
                 Oval2DPixZBufferOrigin[ 0] = Oval2DPixZBufferOrigin[ 1] = 0;
-                volumeMapper->GetRayCastImage()->GetImageOrigin( Oval2DPixZBufferOrigin);
-                Oval2DSampleDistance = volumeMapper->GetRayCastImage()->GetImageSampleDistance();
+                Oval2DSampleDistance = volumeMapper->GetImageSampleDistance();
                 Oval2DPixZBufferOrigin[ 0] *= Oval2DSampleDistance;
                 Oval2DPixZBufferOrigin[ 1] *= Oval2DSampleDistance;
                 
@@ -6287,7 +6266,7 @@ public:
         
         // Force min/max recomputing
         if( blendingVolumeMapper) blendingVolumeMapper->Delete();
-        blendingVolumeMapper = vtkHorosFixedPointVolumeRayCastMapper::New();
+        blendingVolumeMapper = vtkSmartVolumeMapper::New();
         blendingVolumeMapper->SetInputConnection(blendingReader->GetOutputPort());
         blendingVolumeMapper->SetMinimumImageSampleDistance( LOD);
         blendingVolumeMapper->Update();
@@ -6958,8 +6937,6 @@ public:
         
         NSLog( @"ratio: %f", ratio);
     }
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     [currentImage setScalesWhenResized:YES];
 #pragma clang diagnostic pop
 
@@ -7005,8 +6982,6 @@ public:
     
     if( volumeMapper)
     {
-        volumeMapper->SetIntermixIntersectingGeometry( 0);
-        
         vtkPiecewiseFunction *tempOpacity = vtkPiecewiseFunction::New();
         
         float start = valueFactor*(OFFSET16 + [controller minimumValue]);
@@ -7016,10 +6991,6 @@ public:
         tempOpacity->AddPoint(end, 1);
         
         volumeProperty->SetScalarOpacity( tempOpacity);
-        volumeMapper->PerVolumeInitialization( aRenderer, volume);
-        
-        unsigned short *o = volumeMapper->GetScalarOpacityTable( 0);	// Fake the opacity table to have full '16-bit' image
-        memcpy( o, [VRView linearOpacity], 32767 * sizeof( unsigned short));
         
         tempOpacity->Delete();
         
@@ -7028,8 +6999,6 @@ public:
     
     if( blendingVolumeMapper)
     {
-        blendingVolumeMapper->SetIntermixIntersectingGeometry( 0);
-        
         vtkPiecewiseFunction *tempOpacity = vtkPiecewiseFunction::New();
         
         float start = blendingValueFactor*(blendingOFFSET16 + [controller blendingMinimumValue]);
@@ -7039,10 +7008,6 @@ public:
         tempOpacity->AddPoint(end, 1);
         
         blendingVolumeProperty->SetScalarOpacity( tempOpacity);
-        blendingVolumeMapper->PerVolumeInitialization( aRenderer, blendingVolume);
-        
-        unsigned short *o = blendingVolumeMapper->GetScalarOpacityTable( 0);	// Fake the opacity table to have full '16-bit' image
-        memcpy( o, [VRView linearOpacity], 32767 * sizeof( unsigned short));
         
         tempOpacity->Delete();
     }
@@ -7052,20 +7017,14 @@ public:
 {
     if( volumeMapper)
     {
-        volumeMapper->SetIntermixIntersectingGeometry( 1);
-        
         volumeProperty->SetScalarOpacity( opacityTransferFunction);
-        volumeMapper->PerVolumeInitialization( aRenderer, volume);
         
         fullDepthMode = 0;
     }
     
     if( blendingVolumeMapper)
     {
-        blendingVolumeMapper->SetIntermixIntersectingGeometry( 1);
-        
         blendingVolumeProperty->SetScalarOpacity( blendingOpacityTransferFunction);
-        blendingVolumeMapper->PerVolumeInitialization( aRenderer, blendingVolume);
     }
     
     if( engine != fullDepthEngineCopy)
@@ -7088,7 +7047,7 @@ public:
     @try
     {
         
-        vtkHorosFixedPointVolumeRayCastMapper *mapper = nil;
+        vtkSmartVolumeMapper *mapper = nil;
         DCMPix *firstObj = nil;
         
         if( blendingView)
@@ -7102,128 +7061,10 @@ public:
             mapper = volumeMapper;
         }
         
-        if( mapper)
-        {
-            vtkFixedPointRayCastImage *rayCastImage = mapper->GetRayCastImage();
-            
-            unsigned short *im = rayCastImage->GetImage();
-            
-            int fullSize[2];
-            rayCastImage->GetImageMemorySize( fullSize);
-            
-            int size[2];
-            rayCastImage->GetImageInUseSize( size);
-            
-            *w = size[0];
-            *h = size[1];
-            
-            if( firstObject.isRGB == NO && ( renderingMode == 1 || renderingMode == 3 || renderingMode == 2))		// MIP
-            {
-                unsigned short *destPtr, *destFixedPtr;
-                
-                destPtr = destFixedPtr = (unsigned short*) malloc( (*w+1) * (*h+1) * sizeof( unsigned short));
-                if( destFixedPtr)
-                {
-                    unsigned short *iptr;
-                    
-                    iptr = im + 3 + 4*(*h-1)*fullSize[0];
-                    vImage_Buffer src, dst;
-                    
-                    int j = *h, rowBytes = 4*fullSize[0];
-                    while( j-- > 0)
-                    {
-                        unsigned short *iptrTemp = iptr;
-                        int i = *w;
-                        while( i-- > 0)
-                        {
-                            *destPtr++ = *iptrTemp;
-                            iptrTemp += 4;
-                        }
-                        
-                        iptr -= rowBytes;
-                    }
-                    
-                    float mul;
-                    float add;
-                    
-                    if( blendingView)
-                    {
-                        mul = 1./blendingValueFactor;
-                        add = -blendingOFFSET16;
-                        
-                        if( blendingValueFactor != 1)
-                            mul = mul;
-                        else
-                            mul = 1;
-                    }
-                    else
-                    {
-                        mul = 1./valueFactor;
-                        add = -OFFSET16;
-                        
-                        if( valueFactor != 1)
-                            mul = mul;
-                        else
-                            mul = 1;
-                    }
-                    
-                    src.data = destFixedPtr;
-                    src.height = *h;
-                    src.width = *w;
-                    src.rowBytes = *w * 2;
-                    
-                    dst.data = malloc( (*w+1) * (*h+1) * sizeof( float));
-                    if( dst.data)
-                    {
-                        dst.height = *h;
-                        dst.width = *w;
-                        dst.rowBytes = *w * 4;
-                        
-                        vImageConvert_16UToF( &src, &dst, add, mul, 0);
-                    }
-                    
-                    *rgb = NO;
-                    
-                    free( destFixedPtr);
-                    
-                    returnedPtr = (float*) dst.data;
-                }
-            }
-            else
-            {
-                unsigned char *destPtr, *destFixedPtr;
-                
-                destPtr = destFixedPtr = (unsigned char*) malloc( (*w+1) * (*h+1) * 4 * sizeof( unsigned char));
-                if( destFixedPtr)
-                {
-                    unsigned short *iptr = im + 3 + 4*(*h-1)*fullSize[0];
-                    
-                    int j = *h, rowBytes = 4*fullSize[0];
-                    while( j-- > 0)
-                    {
-                        unsigned short *iptrTemp = iptr;
-                        int i = *w;
-                        while( i-- > 0)
-                        {
-                            *destPtr = 255;
-                            destPtr++;
-                            iptrTemp++;
-                            
-                            *destPtr++ = *iptrTemp++ >> 7;
-                            *destPtr++ = *iptrTemp++ >> 7;
-                            *destPtr++ = *iptrTemp++ >> 7;
-                        }
-                        
-                        iptr -= rowBytes;
-                    }
-                    
-                    *rgb = YES;
-                    
-                    returnedPtr = (float*) destFixedPtr;
-                }
-            }
-        }
-    }
+        // vtkSmartVolumeMapper does not expose an internal pixel buffer.
+        // Full-depth raw-pixel extraction requires Metal/GPU readback (TODO: Sprint 5).
+        (void)mapper;
+        (void)firstObj;    }
     @catch (NSException * e)
     {
         NSLog( @"***** exception in %s: %@", __PRETTY_FUNCTION__, e);
@@ -9075,7 +8916,7 @@ static NSString * const O2PasteboardTypeEventModifierFlags = @"com.opensource.os
 {
     if( volumeMapper == nil)
     {
-        volumeMapper = vtkHorosFixedPointVolumeRayCastMapper::New();
+        volumeMapper = vtkSmartVolumeMapper::New();
         volumeMapper->SetInputConnection(reader->GetOutputPort());
     }
     
@@ -9090,7 +8931,7 @@ static NSString * const O2PasteboardTypeEventModifierFlags = @"com.opensource.os
         if( volumeMapper)
             volumeMapper->Delete();
         
-        volumeMapper = (vtkHorosFixedPointVolumeRayCastMapper*) mapper;
+        volumeMapper = (vtkSmartVolumeMapper*) mapper;
         volume->SetMapper( volumeMapper);
     }
 }
@@ -9408,8 +9249,6 @@ void VRSpaceNavigatorMessageHandler(io_connect_t connection, natural_t messageTy
         case kConnexionMsgDeviceState:
             state = (ConnexionDeviceState*)messageArgument;
             
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
             AbsoluteTime theTime = UpTime();
 #pragma clang diagnostic pop
             uint64_t t = ((uint64_t*) &theTime)[0];

@@ -42,36 +42,6 @@
 static NSMutableDictionary *lockedFiles = nil;
 static NSRecursiveLock *lockFile = nil;
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-
-/*
- * Function: SSLSecPolicyCopy
- * Purpose:
- *   Returns a copy of the SSL policy.
- */
-static OSStatus SSLSecPolicyCopy(SecPolicyRef *ret_policy)
-{
-	SecPolicyRef policy;
-	SecPolicySearchRef policy_search;
-	OSStatus status;
-	
-	*ret_policy = NULL;
-	status = SecPolicySearchCreate(CSSM_CERT_X_509v3, &CSSMOID_APPLE_TP_SSL, NULL, &policy_search);
-	//status = SecPolicySearchCreate(CSSM_CERT_X_509v3, &CSSMOID_APPLE_X509_BASIC, NULL, &policy_search);
-    if (status == errSecSuccess) {
-        status = SecPolicySearchCopyNext(policy_search, &policy);
-        
-        if (status == errSecSuccess)
-            *ret_policy = policy;
-	
-        CFRelease(policy_search);
-    }
-    
-	return (status);
-}
-
-
 @implementation DDKeychain
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -83,37 +53,22 @@ static OSStatus SSLSecPolicyCopy(SecPolicyRef *ret_policy)
 **/
 + (NSString *)passwordForHTTPServer
 {
-	NSString *password = nil;
-	
-	const char *service = [@"OsiriX HTTP Server" UTF8String];
-	const char *account = [@"OsiriX" UTF8String];
-	
-	UInt32 passwordLength = 0;
-	void *passwordBytes = nil;
-	
-	OSStatus status;
-	status = SecKeychainFindGenericPassword(NULL,            // default keychain
-											strlen(service), // length of service name
-											service,         // service name
-											strlen(account), // length of account name
-											account,         // account name
-											&passwordLength, // length of password
-											&passwordBytes,  // pointer to password data
-											NULL);           // keychain item reference (NULL if unneeded)
-	
-	if(status == noErr)
-	{
-		NSData *passwordData = [NSData dataWithBytesNoCopy:passwordBytes length:passwordLength freeWhenDone:NO];
-		password = [[[NSString alloc] initWithData:passwordData encoding:NSUTF8StringEncoding] autorelease];
+	NSDictionary *query = @{
+		(__bridge id)kSecClass:       (__bridge id)kSecClassGenericPassword,
+		(__bridge id)kSecAttrService: @"OsiriX HTTP Server",
+		(__bridge id)kSecAttrAccount: @"OsiriX",
+		(__bridge id)kSecReturnData:  @YES,
+		(__bridge id)kSecMatchLimit:  (__bridge id)kSecMatchLimitOne
+	};
+	CFDataRef result = NULL;
+	OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)query, (CFTypeRef *)&result);
+	if (status == errSecSuccess && result) {
+		NSString *password = [[[NSString alloc] initWithData:(__bridge NSData *)result
+		                                            encoding:NSUTF8StringEncoding] autorelease];
+		CFRelease(result);
+		return password;
 	}
-	
-	// SecKeychainItemFreeContent(attrList, data)
-	// attrList - previously returned attributes
-	// data - previously returned password
-	
-	if(passwordBytes) SecKeychainItemFreeContent(NULL, passwordBytes);
-	
-	return password;
+	return nil;
 }
 
 
@@ -122,56 +77,24 @@ static OSStatus SSLSecPolicyCopy(SecPolicyRef *ret_policy)
 **/
 + (BOOL)setPasswordForHTTPServer:(NSString *)password
 {
-	const char *service = [@"OsiriX HTTP Server" UTF8String];
-	const char *account = [@"OsiriX" UTF8String];
-	const char *kind    = [@"OsiriX password" UTF8String];
-	const char *passwd  = [password UTF8String];
-	
-	SecKeychainItemRef itemRef = NULL;
-	
-	// The first thing we need to do is check to see a password for the library already exists in the keychain
-	OSStatus status;
-	status = SecKeychainFindGenericPassword(NULL,            // default keychain
-											strlen(service), // length of service name
-											service,         // service name
-											strlen(account), // length of account name
-											account,         // account name
-											NULL,            // length of password (NULL if unneeded)
-											NULL,            // pointer to password data (NULL if unneeded)
-											&itemRef);       // the keychain item reference
-	
-	if(status == errSecItemNotFound)
-	{
-		// Setup the attributes the for the keychain item
-		SecKeychainAttribute attrs[] = {
-			{ kSecServiceItemAttr, strlen(service), (char *)service },
-			{ kSecAccountItemAttr, strlen(account), (char *)account },
-			{ kSecDescriptionItemAttr, strlen(kind), (char *)kind }
-		};
-		SecKeychainAttributeList attributes = { sizeof(attrs) / sizeof(attrs[0]), attrs };
-		
-		status = SecKeychainItemCreateFromContent(kSecGenericPasswordItemClass, // class of item to create
-												  &attributes,                  // pointer to the list of attributes
-												  strlen(passwd),               // length of password
-												  passwd,                       // pointer to password data
-												  NULL,                         // default keychain
-												  NULL,                         // access list (NULL if this app only)
-												  &itemRef);                    // the keychain item reference
+	NSData *passwordData = [password dataUsingEncoding:NSUTF8StringEncoding];
+	NSDictionary *query = @{
+		(__bridge id)kSecClass:       (__bridge id)kSecClassGenericPassword,
+		(__bridge id)kSecAttrService: @"OsiriX HTTP Server",
+		(__bridge id)kSecAttrAccount: @"OsiriX"
+	};
+	OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)query, NULL);
+	if (status == errSecItemNotFound) {
+		NSMutableDictionary *item = [query mutableCopy];
+		[item setObject:passwordData forKey:(__bridge id)kSecValueData];
+		[item setObject:@"OsiriX password" forKey:(__bridge id)kSecAttrDescription];
+		status = SecItemAdd((__bridge CFDictionaryRef)item, NULL);
+		[item release];
+	} else if (status == errSecSuccess) {
+		NSDictionary *update = @{ (__bridge id)kSecValueData: passwordData };
+		status = SecItemUpdate((__bridge CFDictionaryRef)query, (__bridge CFDictionaryRef)update);
 	}
-	else if(status == noErr)
-	{
-		// A keychain item for the library already exists
-		// All we need to do is update it with the new password
-		status = SecKeychainItemModifyAttributesAndData(itemRef,        // the keychain item reference
-														NULL,           // no change to attributes
-														strlen(passwd),	// length of password
-														passwd);        // pointer to password data
-	}
-	
-	// Don't forget to release anything we create
-	if(itemRef)    CFRelease(itemRef);
-	
-	return (status == noErr);
+	return (status == errSecSuccess);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -187,7 +110,6 @@ static OSStatus SSLSecPolicyCopy(SecPolicyRef *ret_policy)
 {
 	// Declare any Carbon variables we may create
 	// We do this here so it's easier to compare to the bottom of this method where we release them all
-	SecKeychainRef keychain = NULL;
 	CFArrayRef outItems = NULL;
 	
 	// Configure the paths where we'll create all of our identity files
@@ -317,116 +239,48 @@ static OSStatus SSLSecPolicyCopy(SecPolicyRef *ret_policy)
 	**/
 	
 	SecKeyImportExportFlags importFlags = kSecKeyImportOnlyOne;
-	
-	/* SecKeyImportExportParameters - typedef struct
-	 *
-	 * FOR IMPORT AND EXPORT:
-	 * uint32_t version
-	 *     The version of this structure; the current value is SEC_KEY_IMPORT_EXPORT_PARAMS_VERSION.
-	 * SecKeyImportExportFlags flags
-	 *     A set of flag bits, defined in "Keychain Item Import/Export Parameter Flags".
-	 * CFTypeRef passphrase
-	 *     A password, used for kSecFormatPKCS12 and kSecFormatWrapped formats only...
-	 *     IE - kSecFormatWrappedOpenSSL, kSecFormatWrappedSSH, or kSecFormatWrappedPKCS8
-	 * CFStringRef alertTitle
-	 *     Title of secure password alert panel.
-	 *     When importing or exporting a key, if you set the kSecKeySecurePassphrase flag bit,
-	 *     you can optionally use this field to specify a string for the password panel’s title bar.
-	 * CFStringRef alertPrompt
-	 *     Prompt in secure password alert panel.
-	 *     When importing or exporting a key, if you set the kSecKeySecurePassphrase flag bit,
-	 *     you can optionally use this field to specify a string for the prompt that appears in the password panel.
-	 *
-	 * FOR IMPORT ONLY:
-	 * SecAccessRef accessRef
-	 *     Specifies the initial access controls of imported private keys.
-	 *     If more than one private key is being imported, all private keys get the same initial access controls.
-	 *     If this field is NULL when private keys are being imported, then the access object for the keychain item
-	 *     for an imported private key depends on the kSecKeyNoAccessControl bit in the flags parameter.
-	 *     If this bit is 0 (or keyParams is NULL), the default access control is used.
-	 *     If this bit is 1, no access object is attached to the keychain item for imported private keys.
-	 * CSSM_KEYUSE keyUsage
-	 *     A word of bits constituting the low-level use flags for imported keys as defined in cssmtype.h.
-	 *     If this field is 0 or keyParams is NULL, the default value is CSSM_KEYUSE_ANYCSSM_KEYUSE_ANY.
-	 * CSSM_KEYATTR_FLAGS keyAttributes
-	 *     The following are valid values for these flags:
-	 *     CSSM_KEYATTR_PERMANENT, CSSM_KEYATTR_SENSITIVE, and CSSM_KEYATTR_EXTRACTABLE.
-	 *     The default value is CSSM_KEYATTR_SENSITIVE | CSSM_KEYATTR_EXTRACTABLE
-	 *     The CSSM_KEYATTR_SENSITIVE bit indicates that the key can only be extracted in wrapped form.
-	 *     Important: If you do not set the CSSM_KEYATTR_EXTRACTABLE bit,
-	 *     you cannot extract the imported key from the keychain in any form, including in wrapped form.
-	**/
-	
-	SecKeyImportExportParameters importParameters;
+
+	SecItemImportExportKeyParameters importParameters;
+	memset(&importParameters, 0, sizeof(importParameters));
 	importParameters.version = SEC_KEY_IMPORT_EXPORT_PARAMS_VERSION;
 	importParameters.flags = importFlags;
 	importParameters.passphrase = CFSTR("password");
-	importParameters.accessRef = NULL;
-	importParameters.keyUsage = CSSM_KEYUSE_ANY;
-	importParameters.keyAttributes = CSSM_KEYATTR_SENSITIVE | CSSM_KEYATTR_EXTRACTABLE;
-	
-	/* SecKeychainItemImport - Imports one or more certificates, keys, or identities and adds them to a keychain.
-	 * 
-	 * Parameters:
-	 * CFDataRef importedData
-	 *     The external representation of the items to import.
-	 * CFStringRef fileNameOrExtension
-	 *     The name or extension of the file from which the external representation was obtained.
-	 *     Pass NULL if you don’t know the name or extension.
-	 * SecExternalFormat *inputFormat
-	 *     On input, points to the format of the external representation.
-	 *     Pass kSecFormatUnknown if you do not know the exact format.
-	 *     On output, points to the format that the function has determined the external representation to be in.
-	 *     Pass NULL if you don’t know the format and don’t want the format returned to you.
-	 * SecExternalItemType *itemType
-	 *     On input, points to the item type of the item or items contained in the external representation.
-	 *     Pass kSecItemTypeUnknown if you do not know the item type.
-	 *     On output, points to the item type that the function has determined the external representation to contain.
-	 *     Pass NULL if you don’t know the item type and don’t want the type returned to you.
-	 * SecItemImportExportFlags flags
-	 *     Unused; pass in 0.
-	 * const SecKeyImportExportParameters *keyParams
-	 *     A pointer to a structure containing a set of input parameters for the function.
-	 *     If no key items are being imported, these parameters are optional
-	 *     and you can set the keyParams parameter to NULL.
-	 * SecKeychainRef importKeychain
-	 *     A keychain object indicating the keychain to which the key or certificate should be imported.
-	 *     If you pass NULL, the item is not imported.
-	 *     Use the SecKeychainCopyDefault function to get a reference to the default keychain.
-	 *     If the kSecKeyImportOnlyOne bit is set and there is more than one key in the
-	 *     incoming external representation, no items are imported to the specified keychain and the
-	 *     error errSecMultiplePrivKeys is returned.
-	 * CFArrayRef *outItems
-	 *     On output, points to an array of SecKeychainItemRef objects for the imported items.
-	 *     You must provide a valid pointer to a CFArrayRef object to receive this information.
-	 *     If you pass NULL for this parameter, the function does not return the imported items.
-	 *     Release this object by calling the CFRelease function when you no longer need it.
-	**/
-	
+	importParameters.keyUsage = NULL;      // NULL = default (any)
+	importParameters.keyAttributes = NULL; // NULL = default
+
 	SecExternalFormat inputFormat = kSecFormatPKCS12;
 	SecExternalItemType itemType = kSecItemTypeUnknown;
-	
-	SecKeychainCopyDefault(&keychain);
-	
-	OSStatus err = 0;
-	err = SecKeychainItemImport((CFDataRef)certData,   // CFDataRef importedData
-								NULL,                  // CFStringRef fileNameOrExtension
-								&inputFormat,          // SecExternalFormat *inputFormat
-								&itemType,             // SecExternalItemType *itemType
-								0,                     // SecItemImportExportFlags flags (Unused)
-								&importParameters,     // const SecKeyImportExportParameters *keyParams
-								keychain,              // SecKeychainRef importKeychain
-								&outItems);            // CFArrayRef *outItems
-	
+
+
+	SecKeychainRef keychain = NULL;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+	OSStatus err = SecKeychainCopyDefault(&keychain);
+#pragma clang diagnostic pop
+	if (err != errSecSuccess) {
+		NSLog(@"createNewIdentity: SecKeychainCopyDefault failed: %@", [DDKeychain stringForError:err]);
+	}
+
+	err = SecItemImport((CFDataRef)certData,   // CFDataRef importedData
+						NULL,                  // CFStringRef fileNameOrExtension
+						&inputFormat,          // SecExternalFormat *inputFormat
+						&itemType,             // SecExternalItemType *itemType
+						0,                     // SecItemImportExportFlags flags (Unused)
+						&importParameters,     // const SecItemImportExportKeyParameters *keyParams
+						keychain,              // SecKeychainRef importKeychain
+						&outItems);            // CFArrayRef *outItems
+
 	NSLog(@"OSStatus: %i", (int) err);
-	
 	NSLog(@"SecExternalFormat: %@", [DDKeychain stringForSecExternalFormat:inputFormat]);
 	NSLog(@"SecExternalItemType: %@", [DDKeychain stringForSecExternalItemType:itemType]);
-	
 	NSLog(@"outItems: %@", (NSArray *)outItems);
-	
-	SecIdentityRef identity = (SecIdentityRef)[(NSArray *)outItems lastObject];
-	[DDKeychain KeychainAccessSetPreferredIdentity:identity forName:@"org.horosproject.horoswebserver" keyUse:CSSM_KEYUSE_ANY];
+
+	if (err == errSecSuccess && outItems && CFArrayGetCount(outItems) > 0) {
+		SecIdentityRef identity = (SecIdentityRef)[(NSArray *)outItems lastObject];
+		[DDKeychain KeychainAccessSetPreferredIdentity:identity forName:@"org.horosproject.horoswebserver" keyUse:0];
+	} else if (err != errSecSuccess) {
+		NSLog(@"createNewIdentity: SecItemImport failed: %@", [DDKeychain stringForError:err]);
+	}
 	
 	// Don't forget to delete the temporary files
 	[[NSFileManager defaultManager] removeItemAtPath:privateKeyPath error:NULL];
@@ -440,118 +294,33 @@ static OSStatus SSLSecPolicyCopy(SecPolicyRef *ret_policy)
 }
 
 /**
- * Returns an array of SecCertificateRefs except for the first element in the array, which is a SecIdentityRef.
- * Currently this method is designed to return the identity created in the method above.
- * You will most likely alter this method to return a proper identity based on what it is you're trying to do.
+ * Returns an array containing the matching SecIdentityRef for the Horos web server.
+ * Uses SecItemCopyMatching and filters by certificate subject summary prefix.
 **/
 + (NSArray *)SSLIdentityAndCertificates
 {
-	// Declare any Carbon variables we may create
-	// We do this here so it's easier to compare to the bottom of this method where we release them all
-	SecKeychainRef keychain = NULL;
-	SecIdentitySearchRef searchRef = NULL;
-	
-	// Create array to hold the results
 	NSMutableArray *result = [NSMutableArray array];
-	
-	/* SecKeychainAttribute - typedef struct
-	 * Contains keychain attributes.
-	 *
-	 * struct SecKeychainAttribute
-	 * {
-	 *   SecKeychainAttrType tag;
-	 *   UInt32 length;
-	 *   void *data;
-	 * };
-	 *
-	 * Fields:
-	 * tag
-	 *     A 4-byte attribute tag. See “Keychain Item Attribute Constants” for valid attribute types.
-	 * length
-	 *     The length of the buffer pointed to by data.
-	 * data
-	 *     A pointer to the attribute data.
-	**/
-
-	/* SecKeychainAttributeList - typedef struct
-	 * Represents a list of keychain attributes.
-	 * 
-	 * struct SecKeychainAttributeList
-	 * {
-	 *   UInt32 count;
-	 *   SecKeychainAttribute *attr;
-	 * };
-	 *
-	 * Fields:
-	 * count
-	 *     An unsigned 32-bit integer that represents the number of keychain attributes in the array.
-	 * attr
-	 *     A pointer to the first keychain attribute in the array.
-	**/
-	
-	SecKeychainCopyDefault(&keychain);
-	
-	SecIdentitySearchCreate(keychain, CSSM_KEYUSE_ANY, &searchRef);
-	
-	SecIdentityRef currentIdentityRef = NULL;
-	while(searchRef && (SecIdentitySearchCopyNext(searchRef, &currentIdentityRef) != errSecItemNotFound))
-	{
-		// Extract the private key from the identity, and examine it to see if it will work for us
-		SecKeyRef privateKeyRef = NULL;
-		SecIdentityCopyPrivateKey(currentIdentityRef, &privateKeyRef);
-		
-		if(privateKeyRef)
-		{
-			// Get the name attribute of the private key
-			// We're looking for a private key with the name of "Mojo User"
-			
-			SecItemAttr itemAttributes[] = {kSecKeyPrintName};
-			
-			SecExternalFormat externalFormats[] = {kSecFormatUnknown};
-			
-			int itemAttributesSize  = sizeof(itemAttributes) / sizeof(*itemAttributes);
-			int externalFormatsSize = sizeof(externalFormats) / sizeof(*externalFormats);
-			NSAssert(itemAttributesSize == externalFormatsSize, @"Arrays must have identical counts!");
-			
-			SecKeychainAttributeInfo info = {itemAttributesSize, (void *)&itemAttributes, (void *)&externalFormats};
-			
-			SecKeychainAttributeList *privateKeyAttributeList = NULL;
-			SecKeychainItemCopyAttributesAndData((SecKeychainItemRef)privateKeyRef,
-			                                     &info, NULL, &privateKeyAttributeList, NULL, NULL);
-			
-			if(privateKeyAttributeList)
-			{
-				SecKeychainAttribute nameAttribute = privateKeyAttributeList->attr[0];
-				
-				NSString *name = [[[NSString alloc] initWithBytes:nameAttribute.data
-														   length:(nameAttribute.length)
-														 encoding:NSUTF8StringEncoding] autorelease];
-				
-				// Ugly Hack
-				// For some reason, name sometimes contains odd characters at the end of it
-				// I'm not sure why, and I don't know of a proper fix, thus the use of the hasPrefix: method
-				if([name hasPrefix: @"org.horosproject.horoswebserver"])
-				{
-					// It's possible for there to be more than one private key with the above prefix
-					// But we're only allowed to have one identity, so we make sure to only add one to the array
-					if([result count] == 0)
-					{
-						[result addObject:(id)currentIdentityRef];
-					}
+	NSDictionary *query = @{
+		(__bridge id)kSecClass:      (__bridge id)kSecClassIdentity,
+		(__bridge id)kSecMatchLimit: (__bridge id)kSecMatchLimitAll,
+		(__bridge id)kSecReturnRef:  @YES
+	};
+	CFTypeRef items = NULL;
+	if (SecItemCopyMatching((__bridge CFDictionaryRef)query, &items) == errSecSuccess && items) {
+		NSArray *identities = (__bridge_transfer NSArray *)items;
+		for (id obj in identities) {
+			SecIdentityRef identityRef = (__bridge SecIdentityRef)obj;
+			SecCertificateRef certRef = NULL;
+			SecIdentityCopyCertificate(identityRef, &certRef);
+			if (certRef) {
+				NSString *label = (__bridge_transfer NSString *)SecCertificateCopySubjectSummary(certRef);
+				CFRelease(certRef);
+				if ([label hasPrefix:@"org.horosproject.horoswebserver"] && result.count == 0) {
+					[result addObject:obj];
 				}
-				
-				SecKeychainItemFreeAttributesAndData(privateKeyAttributeList, NULL);
 			}
-			
-			CFRelease(privateKeyRef);
 		}
-		
-		CFRelease(currentIdentityRef);
 	}
-	
-	if(keychain)  CFRelease(keychain);
-	if(searchRef) CFRelease(searchRef);
-	
 	return result;
 }
 
@@ -635,44 +404,6 @@ static OSStatus SSLSecPolicyCopy(SecPolicyRef *ret_policy)
 	}
 }
 
-/**
- * Simple utility class to convert a SecKeychainAttrType into a string suitable for printing/logging.
-**/
-+ (NSString *)stringForSecKeychainAttrType:(SecKeychainAttrType)attrType
-{
-	switch(attrType)
-	{
-		case kSecCreationDateItemAttr       : return @"kSecCreationDateItemAttr";
-		case kSecModDateItemAttr            : return @"kSecModDateItemAttr";
-		case kSecDescriptionItemAttr        : return @"kSecDescriptionItemAttr";
-		case kSecCommentItemAttr            : return @"kSecCommentItemAttr";
-		case kSecCreatorItemAttr            : return @"kSecCreatorItemAttr";
-		case kSecTypeItemAttr               : return @"kSecTypeItemAttr";
-		case kSecScriptCodeItemAttr         : return @"kSecScriptCodeItemAttr";
-		case kSecLabelItemAttr              : return @"kSecLabelItemAttr";
-		case kSecInvisibleItemAttr          : return @"kSecInvisibleItemAttr";
-		case kSecNegativeItemAttr           : return @"kSecNegativeItemAttr";
-		case kSecCustomIconItemAttr         : return @"kSecCustomIconItemAttr";
-		case kSecAccountItemAttr            : return @"kSecAccountItemAttr";
-		case kSecServiceItemAttr            : return @"kSecServiceItemAttr";
-		case kSecGenericItemAttr            : return @"kSecGenericItemAttr";
-		case kSecSecurityDomainItemAttr     : return @"kSecSecurityDomainItemAttr";
-		case kSecServerItemAttr             : return @"kSecServerItemAttr";
-		case kSecAuthenticationTypeItemAttr : return @"kSecAuthenticationTypeItemAttr";
-		case kSecPortItemAttr               : return @"kSecPortItemAttr";
-		case kSecPathItemAttr               : return @"kSecPathItemAttr";
-		case kSecVolumeItemAttr             : return @"kSecVolumeItemAttr";
-		case kSecAddressItemAttr            : return @"kSecAddressItemAttr";
-		case kSecSignatureItemAttr          : return @"kSecSignatureItemAttr";
-		case kSecProtocolItemAttr           : return @"kSecProtocolItemAttr";
-		case kSecCertificateType            : return @"kSecCertificateType";
-		case kSecCertificateEncoding        : return @"kSecCertificateEncoding";
-		case kSecCrlType                    : return @"kSecCrlType";
-		case kSecCrlEncoding                : return @"kSecCrlEncoding";
-		case kSecAlias                      : return @"kSecAlias";
-		default                             : return @"Unknown";
-	}
-}
 
 + (NSString *)stringForError:(OSStatus)status;
 {
@@ -687,8 +418,6 @@ static OSStatus SSLSecPolicyCopy(SecPolicyRef *ret_policy)
 
 
 + (NSArray *)KeychainAccessCertificatesList {
-    CFArrayRef searchList;
-    SecKeychainCopySearchList (&searchList);
     
     CFTypeRef   arrayRef     = NULL;
     NSDictionary * dict = @{
@@ -726,25 +455,6 @@ static OSStatus SSLSecPolicyCopy(SecPolicyRef *ret_policy)
 
             NSDictionary * valRef = CFBridgingRelease(SecCertificateCopyValues(certRef, nil, nil));
 
-#if 0
-            SecKeychainRef keychainRef;
-            err = SecKeychainItemCopyKeychain((SecKeychainItemRef)identityRef, &keychainRef);
-            if (err != errSecSuccess) {
-                NSLog(@"%@:%s: SecKeychainItemCopyKeychain failed: %@ (skipping %@)", [[self class] description],
-                      __PRETTY_FUNCTION__, [DDKeychain stringForError:err], identityRef);
-                goto skip;
-            };
-            
-            char path[PATH_MAX];
-            UInt32 len = sizeof(path);
-            err = SecKeychainGetPath(keychainRef, &len, path);
-            if (err != errSecSuccess) {
-                NSLog(@"%@:%s: SecKeychainGetPath failed: %@ (skipping %@)", [[self class] description],
-                      __PRETTY_FUNCTION__, [DDKeychain stringForError:err], identityRef);
-                goto skip;
-            };
-            NSLog(@"%@: %s",[valRef objectForKey:(__bridge id)(kSecOIDCommonName)], path);
-#endif
             
             // Skip certs which cannot be used. Page 29 of ITU-T Rec. X.509 (11/2008):
             //
@@ -779,8 +489,6 @@ static OSStatus SSLSecPolicyCopy(SecPolicyRef *ret_policy)
     };
     if (arrayRef)
         CFRelease(arrayRef);
-    if (searchList)
-        CFRelease(searchList);
 
     return found;
 }
@@ -812,7 +520,7 @@ static OSStatus SSLSecPolicyCopy(SecPolicyRef *ret_policy)
 			{
 				SecCertificateRef certRef = (SecCertificateRef)CFArrayGetValueAtIndex(certArray, dex);			
 				CFDataRef certificateDataRef = NULL;
-				status = SecKeychainItemExport(certRef, kSecFormatX509Cert, kSecItemPemArmour, NULL, &certificateDataRef);
+				status = SecItemExport(certRef, kSecFormatX509Cert, kSecItemPemArmour, NULL, &certificateDataRef);
 				
 				if(status==0)
 				{
@@ -820,7 +528,7 @@ static OSStatus SSLSecPolicyCopy(SecPolicyRef *ret_policy)
 					if(![[NSFileManager defaultManager] fileExistsAtPath:path])
 						[(NSData*)certificateDataRef writeToFile:path atomically:YES];
 				}
-				else NSLog(@"SecKeychainItemExport : error : %@", [DDKeychain stringForError:status]);
+				else NSLog(@"SecItemExport : error : %@", [DDKeychain stringForError:status]);
 				
 			}
 			
@@ -832,6 +540,8 @@ static OSStatus SSLSecPolicyCopy(SecPolicyRef *ret_policy)
 
 // Returns a reference to the preferred identity, or NULL if none was found.
 // Call the CFRelease function to release this object when you are finished with it.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 + (SecIdentityRef)KeychainAccessPreferredIdentityForName:(NSString*)name keyUse:(int)keyUse;
 {
 	SecIdentityRef identity = NULL;
@@ -847,7 +557,8 @@ static OSStatus SSLSecPolicyCopy(SecPolicyRef *ret_policy)
 		OSStatus status = SecIdentitySetPreference(identity, (CFStringRef)name, keyUse);
 		if(status!=0) NSLog(@"KeychainAccessSetPreferredIdentity:forName:keyUse: error: %@", [DDKeychain stringForError:status]);
 	}
-}	
+}
+#pragma clang diagnostic pop
 
 + (NSString*)KeychainAccessCertificateCommonNameForIdentity:(SecIdentityRef)identity;
 {
@@ -874,137 +585,60 @@ static OSStatus SSLSecPolicyCopy(SecPolicyRef *ret_policy)
 }
 
 /*
- * The following method returns the correct icon for a certificate:
- *	- the blue icon for "Standard certificates"
- *	- the gold icon for "Self signed certificates"
- *
- *	The hypothese is : if the subject == the issuer then it is a Self signed certificate
- *	It _seems_ to work (Joris)
+ * Returns the correct icon for a certificate:
+ *   - gold icon for self-signed certificates (subject == issuer)
+ *   - blue icon for standard certificates
  */
-+ (NSImage*)KeychainAccessCertificateIconForIdentity:(SecIdentityRef)identity;
++ (NSImage*)KeychainAccessCertificateIconForIdentity:(SecIdentityRef)identity
 {
 	NSImage *icon = nil;
-	
-	if(identity)
-	{	
-		SecCertificateRef certificateRef = NULL;
-		SecIdentityCopyCertificate(identity, &certificateRef);	
-		if(certificateRef)
-		{
-			const CSSM_X509_NAME *subject, *issuer;
-			SecCertificateGetSubject(certificateRef, &subject);
-			SecCertificateGetIssuer(certificateRef, &issuer);
-			
-			BOOL equal = YES;
-			if(subject->numberOfRDNs==issuer->numberOfRDNs)
-			{
-				int i, j;
-				for (i=0; i<subject->numberOfRDNs; i++)
-				{
-					CSSM_X509_RDN issuerRDN = issuer->RelativeDistinguishedName[i];
-					CSSM_X509_RDN subjectRDN = subject->RelativeDistinguishedName[i];
-										
-					if(issuerRDN.numberOfPairs==subjectRDN.numberOfPairs)
-					{
-						for (j=0; j<subjectRDN.numberOfPairs; j++)
-						{
-							CSSM_X509_TYPE_VALUE_PAIR issuerVP = issuerRDN.AttributeTypeAndValue[j];
-							CSSM_X509_TYPE_VALUE_PAIR subjectVP = subjectRDN.AttributeTypeAndValue[j];
-
-							NSData *issuerVPData = [NSData dataWithBytes:issuerVP.value.Data length:issuerVP.value.Length];
-							NSData *subjectVPData = [NSData dataWithBytes:subjectVP.value.Data length:subjectVP.value.Length];
-							
-							if ([issuerVPData isEqualToData:subjectVPData])
-								equal &= YES;
-							else
-							{
-								equal = NO;
-								break;
-							}
-						}
-					}
-					else
-					{
-						equal = NO;
-						break;
-					}
-				}
-			}
-			else
-				equal = NO;
-
-			CFRelease(certificateRef);
-			
-			if(equal)
-			{
-				// Self signed certificate
-				icon = [NSImage imageNamed:@"CertSmallRoot.tif"];
-			}
-			else 
-			{
-				// Standard certificate
-				icon = [NSImage imageNamed:@"CertSmallStd.tif"];
-			}
-		}	
-	}	
+	if (!identity) return nil;
+	SecCertificateRef certRef = NULL;
+	SecIdentityCopyCertificate(identity, &certRef);
+	if (certRef) {
+		NSData *subject = (__bridge_transfer NSData *)SecCertificateCopyNormalizedSubjectSequence(certRef);
+		NSData *issuer  = (__bridge_transfer NSData *)SecCertificateCopyNormalizedIssuerSequence(certRef);
+		CFRelease(certRef);
+		BOOL selfSigned = (subject && issuer && [subject isEqualToData:issuer]);
+		icon = selfSigned ? [NSImage imageNamed:@"CertSmallRoot.tif"]
+		                  : [NSImage imageNamed:@"CertSmallStd.tif"];
+	}
 	return icon;
 }
 
-+ (NSArray*)KeychainAccessCertificateChainForIdentity:(SecIdentityRef)identity;
++ (NSArray*)KeychainAccessCertificateChainForIdentity:(SecIdentityRef)identity
 {
-	OSStatus status;
-    NSArray *returnedValue = nil;
-    
-	if(identity)
-	{		
-		SecCertificateRef certificateRef = NULL;
-		SecIdentityCopyCertificate(identity, &certificateRef);
-		
-		if(certificateRef)
-		{
-			SecPolicyRef sslPolicy = NULL;		
-			status = SSLSecPolicyCopy(&sslPolicy);
-			
-			if(status==0)
-			{
-				if(sslPolicy)
-				{
-					SecTrustRef trust = NULL;
-					status = SecTrustCreateWithCertificates((CFArrayRef)[NSArray arrayWithObject:(id)certificateRef], sslPolicy, &trust);
-					if(status==0)
-					{
-						SecTrustResultType result;
-						status = SecTrustEvaluate(trust, &result);
-						
-						if(status==0)
-						{
-							CFArrayRef certChain;
-							CSSM_TP_APPLE_EVIDENCE_INFO *statusChain;
-							status = SecTrustGetResult(trust, &result, &certChain, &statusChain);
-							if(status==0)
-							{
-								NSArray *certificatesChain = [NSArray arrayWithArray:(NSArray*)certChain];
-								CFRelease(certChain);
-								returnedValue = certificatesChain;
-							}
-							else NSLog(@"SecTrustGetResult : error : %@", [DDKeychain stringForError:status]);
-						}
-						else NSLog(@"SecTrustEvaluate : error : %@", [DDKeychain stringForError:status]);	
-						
-						CFRelease(trust);
-					}
-					else NSLog(@"SecTrustCreateWithCertificates : error : %@", [DDKeychain stringForError:status]);
+	if (!identity) return nil;
+	SecCertificateRef certRef = NULL;
+	SecIdentityCopyCertificate(identity, &certRef);
+	if (!certRef) return nil;
 
-					CFRelease(sslPolicy);
-				}
-			}
-			else NSLog(@"SSLSecPolicyCopy : error : %@", [DDKeychain stringForError:status]);
+	SecPolicyRef sslPolicy = SecPolicyCreateSSL(true, NULL);
+	SecTrustRef trust = NULL;
+	NSArray *returnedValue = nil;
 
-			CFRelease(certificateRef);
+	OSStatus status = SecTrustCreateWithCertificates(
+		(__bridge CFTypeRef)@[(__bridge id)certRef], sslPolicy, &trust);
+	if (status == errSecSuccess && trust) {
+		CFErrorRef evalError = NULL;
+		bool trusted = SecTrustEvaluateWithError(trust, &evalError);
+		if (!trusted) {
+			NSLog(@"KeychainAccessCertificateChainForIdentity: trust evaluation failed: %@",
+				  evalError ? (__bridge NSError *)evalError : nil);
 		}
+		if (evalError) CFRelease(evalError);
+
+		CFArrayRef chain = SecTrustCopyCertificateChain(trust);
+		if (chain) {
+			returnedValue = (__bridge_transfer NSArray *)chain;
+		}
+		CFRelease(trust);
 	}
+	CFRelease(sslPolicy);
+	CFRelease(certRef);
 	return returnedValue;
 }
+
 
 + (void)KeychainAccessExportCertificateForIdentity:(SecIdentityRef)identity toPath:(NSString*)path;
 {
@@ -1015,13 +649,13 @@ static OSStatus SSLSecPolicyCopy(SecPolicyRef *ret_policy)
 	if(status==0)
 	{
 		CFDataRef certificateDataRef = NULL;
-		status = SecKeychainItemExport(certificate, kSecFormatX509Cert, kSecItemPemArmour, NULL, &certificateDataRef);
+		status = SecItemExport(certificate, kSecFormatX509Cert, kSecItemPemArmour, NULL, &certificateDataRef);
 		
 		if(status==0)
 		{
 			[(NSData*)certificateDataRef writeToFile:path atomically:YES];
 		}
-		else NSLog(@"SecKeychainItemExport : error : %@", [DDKeychain stringForError:status]);
+		else NSLog(@"SecItemExport : error : %@", [DDKeychain stringForError:status]);
 		
 		CFRelease(certificate);	
 	}
@@ -1037,9 +671,11 @@ static OSStatus SSLSecPolicyCopy(SecPolicyRef *ret_policy)
 	if(status==0)
 	{
 		CFDataRef privateKeyDataRef = NULL;
-		SecKeyImportExportParameters exportParameters = {.passphrase=(CFStringRef)password};
+		SecItemImportExportKeyParameters exportParameters;
+		memset(&exportParameters, 0, sizeof(exportParameters));
+		exportParameters.passphrase = (CFStringRef)password;
 		
-		status = SecKeychainItemExport(privateKey, kSecFormatPKCS12, 0, &exportParameters, &privateKeyDataRef);
+		status = SecItemExport(privateKey, kSecFormatPKCS12, 0, &exportParameters, &privateKeyDataRef);
 		
 		if(status==0)
 		{
@@ -1064,7 +700,7 @@ static OSStatus SSLSecPolicyCopy(SecPolicyRef *ret_policy)
             
 			[[NSFileManager defaultManager] removeItemAtPath:[path stringByAppendingPathExtension:@"p12"] error:NULL]; // remove the .p12 file
 		}
-		else NSLog(@"SecKeychainItemExport : error : %@", [DDKeychain stringForError:status]);
+		else NSLog(@"SecItemExport : error : %@", [DDKeychain stringForError:status]);
 		
 		CFRelease(privateKey);
 	}
@@ -1095,7 +731,7 @@ static OSStatus SSLSecPolicyCopy(SecPolicyRef *ret_policy)
 // Call the CFRelease function to release this object when you are finished with it.
 + (SecIdentityRef)identityForLabel:(NSString*)label;
 {
-	return [DDKeychain KeychainAccessPreferredIdentityForName:label keyUse:CSSM_KEYUSE_ANY];
+	return [DDKeychain KeychainAccessPreferredIdentityForName:label keyUse:0];
 }
 
 + (NSString*)certificateNameForLabel:(NSString*)label;
@@ -1205,6 +841,5 @@ static OSStatus SSLSecPolicyCopy(SecPolicyRef *ret_policy)
 	//system([cmd cStringUsingEncoding:NSUTF8StringEncoding]);
 }
 
-#pragma clang diagnostic pop
 
 @end

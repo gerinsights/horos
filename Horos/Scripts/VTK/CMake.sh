@@ -29,7 +29,8 @@ command -v cmake >/dev/null 2>&1 || { echo >&2 "error: building $TARGET_NAME req
 command -v pkg-config >/dev/null 2>&1 || { echo >&2 "error: building $TARGET_NAME requires pkg-config. Please install pkg-config. Aborting."; exit 1; }
 command -v git-lfs >/dev/null 2>&1 || { echo >&2 "error: building $TARGET_NAME requires git-lfs. Please install git-lfs. Aborting."; exit 1; }
 
-mv "$cmake_dir" "$cmake_dir.tmp"
+rm -rf "$cmake_dir.tmp"
+[ -d "$cmake_dir" ] && mv "$cmake_dir" "$cmake_dir.tmp"
 [ -d "$install_dir" ] && mv "$install_dir" "$install_dir.tmp"
 rm -Rf "$cmake_dir.tmp" "$install_dir.tmp"
 mkdir -p "$cmake_dir"; cd "$cmake_dir"
@@ -47,27 +48,36 @@ args+=(-DCMAKE_POLICY_VERSION_MINIMUM=3.5)
 args+=(-DCMAKE_OSX_DEPLOYMENT_TARGET="$MACOSX_DEPLOYMENT_TARGET")
 args+=(-DCMAKE_OSX_ARCHITECTURES="$ARCHS")
 
-args+=(-DVTK_USE_SYSTEM_ZLIB:BOOL=ON)
-args+=(-DVTK_USE_SYSTEM_EXPAT=ON)
-args+=(-DVTK_USE_SYSTEM_LIBXML2=ON)
+# VTK 9: system third-party library flags (renamed from VTK_USE_SYSTEM_*)
+args+=(-DVTK_MODULE_USE_EXTERNAL_VTK_zlib=ON)
+args+=(-DVTK_MODULE_USE_EXTERNAL_VTK_expat=ON)
+args+=(-DVTK_MODULE_USE_EXTERNAL_VTK_libxml2=ON)
 
 # args+=(-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON)
 
 [ "$CONFIGURATION" == 'Release' ] && args+=( -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS_RELEASE=-O3 )
 
-args+=(-DVTK_Group_StandAlone=OFF -DVTK_Group_Rendering=OFF) # disable the default groups
-args+=(-DModule_vtkIOImage=ON)
-args+=(-DModule_vtkFiltersGeneral=ON)
-args+=(-DModule_vtkImagingMorphological=ON)
-args+=(-DModule_vtkImagingStencil=ON)
-args+=(-DModule_vtkRenderingOpenGL2=ON)
-args+=(-DModule_vtkRenderingVolumeOpenGL2=ON)
-args+=(-DModule_vtkRenderingAnnotation=ON)
-args+=(-DModule_vtkInteractionWidgets=ON)
-args+=(-DModule_vtkIOGeometry=ON)
-args+=(-DModule_vtkIOExport=ON)
-args+=(-DModule_vtkFiltersTexture=ON)
-args+=(-DModule_vtktiff=ON)
+# VTK 9: suppress groups by default but allow transitive deps to pull them in.
+# Use DONT_WANT (not NO) so dependency resolution can enable required sub-modules.
+args+=(-DVTK_GROUP_ENABLE_StandAlone=DONT_WANT)
+args+=(-DVTK_GROUP_ENABLE_Rendering=DONT_WANT)
+args+=(-DVTK_MODULE_ENABLE_VTK_RenderingOpenGL2=YES)
+args+=(-DVTK_MODULE_ENABLE_VTK_RenderingVolumeOpenGL2=YES)
+args+=(-DVTK_MODULE_ENABLE_VTK_RenderingAnnotation=YES)
+args+=(-DVTK_MODULE_ENABLE_VTK_InteractionWidgets=YES)
+args+=(-DVTK_MODULE_ENABLE_VTK_IOImage=YES)
+args+=(-DVTK_MODULE_ENABLE_VTK_IOGeometry=YES)
+args+=(-DVTK_MODULE_ENABLE_VTK_IOExport=YES)
+args+=(-DVTK_MODULE_ENABLE_VTK_FiltersGeneral=YES)
+args+=(-DVTK_MODULE_ENABLE_VTK_ImagingMorphological=YES)
+args+=(-DVTK_MODULE_ENABLE_VTK_ImagingStencil=YES)
+args+=(-DVTK_MODULE_ENABLE_VTK_FiltersTexture=YES)
+# FiltersPoints provides vtkPowerCrustSurfaceReconstruction (used in ROIVolumeView.mm)
+args+=(-DVTK_MODULE_ENABLE_VTK_FiltersPoints=YES)
+# Metal backend preference (no separate RenderingMetal module in VTK 9.6)
+args+=(-DVTK_USE_METAL=ON)
+# Fail at compile time on any legacy VTK API usage
+args+=(-DVTK_LEGACY_REMOVE=ON)
 
 args+=(-DCMAKE_INSTALL_PREFIX="$install_dir")
 args+=(-DVTK_INSTALL_INCLUDE_DIR="include")
@@ -81,9 +91,6 @@ fi
 if [ ! -z "$CLANG_CXX_LANGUAGE_STANDARD" ]; then
 #    args+=(-DCMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD="$CLANG_CXX_LANGUAGE_STANDARD")
     cxxstd="$CLANG_CXX_LANGUAGE_STANDARD"
-    if [ "$cxxstd" = "c++0x" ]; then
-        cxxstd="c++11"
-    fi
     cxxfs+=(-std="$cxxstd")
 fi
 
@@ -93,7 +100,7 @@ for i in "${!cxxfs[@]}"; do
         unset 'cxxfs[$i]'
     fi
 done
-cxxfs+=( -std=c++11 )
+cxxfs+=( -std=c++17 )
 
 if [ ${#cxxfs[@]} -ne 0 ]; then
     cxxfss="${cxxfs[@]}"
@@ -101,7 +108,7 @@ if [ ${#cxxfs[@]} -ne 0 ]; then
 fi
 
 # Force a modern C++ standard for VTK/eigen compatibility
-args+=(-DCMAKE_CXX_STANDARD=11)
+args+=(-DCMAKE_CXX_STANDARD=17)
 args+=(-DCMAKE_CXX_STANDARD_REQUIRED=ON)
 
 cmake "${args[@]}"

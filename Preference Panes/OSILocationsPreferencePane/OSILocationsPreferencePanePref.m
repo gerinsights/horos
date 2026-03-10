@@ -920,7 +920,7 @@
 			SecIdentityRef identity = [[SFChooseIdentityPanel sharedChooseIdentityPanel] identity];
 			if(identity)
 			{
-				[DDKeychain KeychainAccessSetPreferredIdentity:identity forName:[self DICOMTLSUniqueLabelForSelectedServer] keyUse:CSSM_KEYUSE_ANY];
+				[DDKeychain KeychainAccessSetPreferredIdentity:identity forName:[self DICOMTLSUniqueLabelForSelectedServer] keyUse:0];
 				[self getTLSCertificate];
 			}
 		}

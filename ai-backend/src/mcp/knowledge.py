@@ -1,0 +1,278 @@
+"""Horos domain knowledge base for the MCP server.
+
+Embedded expertise from codebase exploration of Horos v4.0.0 RC5.
+"""
+
+ARCHITECTURE = """
+# System Architecture
+
+## Nodes
+- **Scanners**: CT (CTA head/neck), MRI (brain)
+- **PACS_CORE**: Central DICOM server (Orthanc or dcm4chee), AE title `PACS_CORE`
+- **AI_SEGMENT**: AI segmentation node (GPU-accelerated, ROCm/CUDA/CPU), AE title `AI_SEGMENT`
+- **HOROS_M1**: Horos workstation, AE title `HOROS_M1`
+
+## Data Flow
+1. Scanner → PACS_CORE (C-STORE)
+2. PACS_CORE routes neuro CTA/MRI → AI_SEGMENT (Orthanc Lua routing)
+3. AI_SEGMENT: receives DICOM → runs AI segmentation → sends DICOM SEG + Secondary Capture → PACS_CORE
+4. Horos queries PACS_CORE → sees original series + AI overlays
+
+## AI Server Stack (Docker Compose)
+- **Orthanc** — DICOM node, REST API, Lua routing, DICOM TLS
+- **AI Service** (FastAPI) — pipeline orchestration, webhook handler, MCP server
+- **Ollama** — on-device LLM for report generation and study triage
+- **Caddy** — TLS-terminating reverse proxy (FIPS-compliant ciphers)
+- PyTorch + ROCm (GPU inference, GPU-agnostic: ROCm/CUDA/CPU)
+- nnUNet v2 / MONAI (3D segmentation models)
+- highdicom / pydicom (DICOM output generation)
+
+## Security
+- FIPS 140 Level 1 compliant by default
+- OpenSSL 3.x FIPS provider in all containers
+- TLS 1.2+ with ECDHE+AESGCM ciphers only
+- ECDSA P-384 certificates
+- Network segmentation: internal (service-to-service), dicom (PACS), external (HTTPS gateway)
+- Non-root containers, read-only filesystems, no-new-privileges
+"""
+
+HOROS_CAPABILITIES = """
+# Horos Display Capabilities
+
+## What Horos CAN display:
+- **DICOM overlays** (0x6000 group): 16 binary overlay channels, togglable
+  - File: Horos/Sources/DCMPix.h — `overlaysChannelON[16]` array
+- **DICOM Secondary Capture**: Color-overlaid slices appear as new series
+  - This is how AI results are made visible in Horos
+- **DICOM SR (Structured Reports)**: Full read/create support
+  - Files: Horos/Sources/StructuredReport.h/mm, SRAnnotation.h/mm
+- **ROIs**: Line, rectangle, oval, polygon, angle, brush, layer overlay
+  - File: Horos/Sources/ROI.h/m (uses OpenGL rendering)
+- **Presentation State**: Graphic objects (POINT, POLYLINE, CIRCLE, ELLIPSE)
+  - File: DCM Framework/DCMPresentationState.h
+
+## What Horos CANNOT display:
+- **DICOM SEG** (Segmentation objects) — NOT supported (silently ignored on import)
+- **Metal rendering** — all rendering is OpenGL (1,065+ references across 70+ files)
+
+## RTSTRUCT Support (FULL — built-in):
+- RTSTRUCT files are importable (thumbnail shown, stored in DB)
+- SOP Class defined in DCM Framework/DCMAbstractSyntaxUID.m (RTStructureSetStorage)
+- **Full RTSTRUCT-to-ROI conversion**: DCMPix.m:4939-5327 (390 lines)
+  - Parses ReferencedFrameOfReferenceSequence → finds referenced image series
+  - Extracts StructureSetROISequence → ROI names/numbers
+  - Extracts ROIContourSequence → ContourData (3D coords)
+  - Transforms DICOM patient coords → pixel coords via ImageOrientation/Position
+  - Creates native ROI objects (tCPolygon) with ROIDisplayColor
+  - Optional brush/texture conversion via `RSTRUCTConvertToBrush` user default
+  - Saves ROIs as DICOM SR annotations per-image
+- **User trigger**: right-click "Create ROIs from RTSTRUCT" (BrowserController.m:10900)
+- **Implication**: AI backend RTSTRUCT output renders as interactive ROI overlays — no plugin needed
+
+## DICOM Networking:
+- C-STORE SCP/SCU: Horos/Sources/DCMTKStoreSCU.mm
+- C-FIND: Horos/Sources/DCMTKQueryNode.mm (patient/study/series/image level)
+- C-MOVE/C-GET: Horos/Sources/QueryController.mm
+- Auto-routing: Horos/Sources/DicomDatabase+Routing.mm (695 lines, full rule system)
+- WADO: Horos/Sources/WADODownload.h/m
+- TLS support with certificate selection from keychain
+
+## Key Horos Architecture:
+- Pure Objective-C/C++ (339 source files, zero Swift, zero Metal)
+- macOS 11.0+ deployment target, arm64 (Apple Silicon)
+- Version: v4.0.0 RC5
+- Plugin system: Horos/Sources/PluginFilter.h (filterImage, processFiles, report actions)
+- Dependencies: ITK, VTK, DCMTK, GDCM, OpenJPEG, OpenSSL, CharLS, Grok
+"""
+
+DICOM_FLOW = """
+# DICOM Data Flow
+
+```
+┌──────────┐     C-STORE      ┌────────────┐    Lua webhook    ┌──────────────┐
+│  Scanner  │ ──────────────→  │  PACS_CORE │ ──────────────→  │  AI_SEGMENT  │
+│  (CT/MR)  │                  │  (Orthanc)  │                  │  (GPU node) │
+└──────────┘                  └────────────┘                  └──────────────┘
+                                     │                                │
+                                     │ C-FIND/C-MOVE                  │ C-STORE
+                                     ▼                                │ (RTSTRUCT + SC + SEG)
+                              ┌────────────┐                          │
+                              │  HOROS_M1   │ ◄────────────────────────┘
+                              │             │   (via PACS_CORE)
+                              └────────────┘
+
+AI Pipeline (inside AI_SEGMENT):
+  Orthanc receives study
+    → Lua OnStableStudy fires
+    → HTTP POST to FastAPI /webhook/orthanc
+    → FastAPI routes to CTA or MRI pipeline
+    → Fetch DICOM from Orthanc REST API
+    → Preprocess (resample, normalize, clip)
+    → GPU inference (nnUNet/MONAI via ROCm/CUDA/CPU)
+    → Post-process (threshold, connected components)
+    → Create triple output:
+      - DICOM RTSTRUCT (rt-utils) — interactive contours in Horos
+      - DICOM Secondary Capture (pydicom) — burned-in overlay, universal
+      - DICOM SEG (highdicom) — voxel-level archive, OHIF/3D Slicer interop
+    → C-STORE results back to PACS_CORE
+```
+"""
+
+PIPELINE_CTA = """
+# CTA Vessel Segmentation Pipeline
+
+## Input
+- CT Angiography (head/neck)
+- Detected by: Modality=CT, BodyPartExamined in {HEAD, NECK}, or StudyDescription contains CTA
+
+## Processing Steps
+1. Fetch DICOM from Orthanc REST API
+2. Convert to 3D volume (SimpleITK)
+3. Resample to isotropic spacing (0.6-0.8mm)
+4. HU clipping: vascular window [-100, 700]
+5. Intensity normalization (z-score)
+6. 3D segmentation: nnUNet v2 (3D full-resolution) or MONAI DynUNet
+7. Post-processing:
+   - Probability threshold
+   - Connected component analysis
+   - Anatomical labeling: intracranial arteries, carotids, vertebrals
+   - Optional: aneurysm candidate detection (saccular outpouchings)
+
+## Output Segments
+| Label | Structure |
+|-------|-----------|
+| 1 | Intracranial arteries |
+| 2 | Carotid arteries |
+| 3 | Vertebral arteries |
+| 4 | Aneurysm candidates (optional) |
+
+## DICOM Output
+- DICOM SEG: Standards-compliant segmentation object (for PACS interop)
+- Secondary Capture: Color-overlaid slices (for Horos viewing)
+"""
+
+PIPELINE_MRI = """
+# MRI Brain/Tissue Segmentation Pipeline (Phase 2)
+
+## Input
+- MRI Brain (T1, T2, FLAIR, DWI)
+- Detected by: Modality=MR, BodyPartExamined in {HEAD, BRAIN}
+
+## Processing Steps
+1. Fetch DICOM from Orthanc
+2. Convert to NIfTI per sequence
+3. Resample to 1mm isotropic
+4. Bias field correction (N4)
+5. Intensity normalization (z-score)
+6. Co-register sequences if multi-sequence model
+7. Brain extraction → brain mask
+8. Tissue segmentation → GM/WM/CSF
+9. Optional: lesion/tumor/stroke models
+
+## Output Segments
+| Label | Structure |
+|-------|-----------|
+| 1 | Brain parenchyma |
+| 2 | Gray matter |
+| 3 | White matter |
+| 4 | CSF |
+| 5 | Lesion (if present) |
+"""
+
+SECURITY = """
+# Security Architecture — FIPS 140 Level 1
+
+## FIPS 140 Level 1 Requirements (software-only)
+- Use a CMVP-validated cryptographic module (OpenSSL 3.x FIPS provider, CMVP #4282/#4811)
+- FIPS-approved algorithms only: AES, SHA-2/SHA-3, ECDSA, RSA 2048+, ECDH P-256+
+- Disallowed: MD5, SHA-1 for signatures, 3DES, ChaCha20-Poly1305, Blake3, RC4
+- Self-tests: power-up integrity check + known-answer tests (handled by `openssl fipsinstall`)
+- Approved RNG: SP 800-90A compliant (OpenSSL DRBG)
+
+## Cryptographic Module Boundary
+- **AI Service**: OpenSSL 3.x FIPS provider via `OPENSSL_CONF` + `fipsinstall`
+  - `cryptography` pip package built from source against system FIPS OpenSSL
+  - Vendored OpenSSL in pip wheels is bypassed via `--no-binary cryptography`
+- **Orthanc**: Same FIPS provider config mounted + env vars set
+  - DCMTK delegates all crypto to OpenSSL — FIPS mode propagates automatically
+- **Caddy gateway**: Go stdlib TLS (not CMVP-validated)
+  - NOTE: For full FIPS validation, replace with NGINX + FIPS OpenSSL
+- **Ollama**: HTTP-only, internal network — inside FIPS boundary, no crypto needed
+
+## TLS Configuration
+- **Minimum protocol**: TLS 1.2
+- **TLS 1.3 suites**: TLS_AES_256_GCM_SHA384, TLS_AES_128_GCM_SHA256
+- **TLS 1.2 suites**: ECDHE_RSA/ECDSA_WITH_AES_{128,256}_GCM_SHA{256,384}
+- **Key exchange**: ECDHE with P-256, P-384 only (x25519 removed for strict FIPS)
+- **Certificates**: ECDSA P-384 + SHA-384 (generated via `scripts/generate_certs.sh`)
+- **Disallowed**: MD5, SHA-1, RC4, DES, 3DES, NULL, EXPORT, static RSA key exchange
+
+## DICOM TLS (Supplement 230 / BCP 195 Profile B.12)
+- Orthanc: `DicomTlsEnabled: true` with FIPS certs
+- Compatible with DICOM B.12 profile (ECDHE+AES-GCM is a subset of FIPS-approved)
+- Standard port: 2762 (dicom-tls), configurable via DICOM_PORT env var
+
+## Network Segmentation (Docker)
+- **internal** network: service-to-service only (no external access)
+- **dicom** network: DICOM TLS port exposed to scanner/PACS network
+- **external** network: HTTPS gateway only
+- Orthanc REST API: internal only (not exposed to host)
+- Ollama API: internal only
+
+## Container Hardening
+- Non-root user (`aiuser`) in AI service
+- `read_only: true` where possible
+- `no-new-privileges` security option
+- Health checks on all services with dependency ordering
+- Secrets via environment variables (not baked into images)
+- Model checksums: SHA-256 only (no MD5/Blake3)
+
+## Known Gaps (documented, not blockers for Level 1)
+- Caddy uses Go stdlib crypto (not CMVP-validated) — replace with NGINX+FIPS for full validation
+- Ollama (Go) has no TLS — mitigated by internal-only Docker network
+- `python:3.12-slim` base may not have FIPS .so — fallback to UBI 9 for production
+- PyTorch/ROCm compute kernels are not cryptographic — no FIPS relevance
+
+## What FIPS 140 Level 1 Does NOT Require
+- Physical security of the module (Level 2+)
+- Tamper-evident seals (Level 2+)
+- Identity-based authentication (Level 3+)
+- Environmental protection (Level 4)
+"""
+
+LLM_INTEGRATION = """
+# LLM Integration (Ollama)
+
+## Architecture
+- Ollama runs as a Docker sidecar service
+- GPU-agnostic: uses same ROCm/CUDA devices as AI segmentation
+- Internal network only — not exposed externally
+- REST API: http://ollama:11434
+
+## Use Cases
+1. **Report generation**: Structured radiology findings from segmentation results
+2. **Study triage**: Natural language classification of study metadata to pipeline routing
+3. **DICOM explanation**: Explain DICOM tags and concepts in clinical context
+4. **Interactive queries**: Answer questions about studies via MCP tools
+
+## Models
+- Default: `llama3.2:3b` (fits in 8GB VRAM alongside segmentation models)
+- Can upgrade to larger models when GPU memory allows
+- Models managed via `ollama pull` / Ollama REST API
+
+## GPU Sharing
+- Segmentation and LLM share the GPU (ROCm/CUDA)
+- Not simultaneous — segmentation runs first, then LLM for report generation
+- Ollama automatically manages VRAM allocation
+"""
+
+# Map of resource URIs to their content
+RESOURCES = {
+    "horos://architecture": ("System Architecture", ARCHITECTURE),
+    "horos://horos-capabilities": ("Horos Capabilities", HOROS_CAPABILITIES),
+    "horos://dicom-flow": ("DICOM Data Flow", DICOM_FLOW),
+    "horos://pipeline/cta": ("CTA Pipeline", PIPELINE_CTA),
+    "horos://pipeline/mri": ("MRI Pipeline", PIPELINE_MRI),
+    "horos://security": ("Security & FIPS 140", SECURITY),
+    "horos://llm": ("LLM Integration", LLM_INTEGRATION),
+}

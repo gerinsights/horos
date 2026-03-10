@@ -1616,8 +1616,6 @@ void erase_outside_circle(char *buf, int width, int height, int cx, int cy, int 
                     imageRect = NSMakeRect(0.0, 0.0, (int) ([currentImage size].width/ratio), (int) ([currentImage size].height/ratio));
                 }
                 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
                 [currentImage setScalesWhenResized:YES];
 #pragma clang diagnostic pop
                 
@@ -10654,8 +10652,6 @@ void erase_outside_circle(char *buf, int width, int height, int cx, int cy, int 
     // image sides (LowerLeft, LowerMiddle, LowerRight, MiddleLeft, MiddleRight, TopLeft, TopMiddle, TopRight) & sameAsDefault
     NSArray *keys = [annotationsForModality allKeys];
     
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     [imageObj.managedObjectContext lock];
 #pragma clang diagnostic pop
     
@@ -10729,8 +10725,6 @@ void erase_outside_circle(char *buf, int width, int height, int cx, int cy, int 
         }
     }
     
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     [imageObj.managedObjectContext unlock];
 #pragma clang diagnostic pop
 

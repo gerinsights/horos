@@ -380,72 +380,71 @@ void QuitAndSleep(NSString* bundleIdentifier, float seconds)
                 
                 if( port == nil)
                     port = @"0";
-                
-                OSStatus err = noErr;
-                UInt32 passwordLength = 0U;
-                void *passwordBytes = NULL;
-                
+
+                CFDataRef passwordData = NULL;
+                OSStatus err = errSecItemNotFound;
+
                 if( username.length) // Do we need to retrieve a password?
                 {
                     @try
                     {
-                        err = SecKeychainFindInternetPassword(/*keychainOrArray*/ NULL,
-                                                          (UInt32)[hostname length], [hostname UTF8String],
-                                                          /*securityDomainLength*/ 0U, /*securityDomain*/ NULL,
-                                                          (UInt32)[username length], [username UTF8String],
-                                                          /*pathLength*/ 0U, /*path*/ NULL,
-                                                          (UInt16)[port integerValue],
-                                                          kSecProtocolTypeSMTP, kSecAuthenticationTypeAny,
-                                                          &passwordLength, &passwordBytes,
-                                                          /*itemRef*/ NULL);
+                        NSDictionary *query = @{
+                            (__bridge id)kSecClass:            (__bridge id)kSecClassInternetPassword,
+                            (__bridge id)kSecAttrServer:       hostname,
+                            (__bridge id)kSecAttrAccount:      username,
+                            (__bridge id)kSecAttrPort:         @([port integerValue]),
+                            (__bridge id)kSecAttrProtocol:     (__bridge id)kSecAttrProtocolSMTP,
+                            (__bridge id)kSecReturnData:       @YES,
+                            (__bridge id)kSecMatchLimit:       (__bridge id)kSecMatchLimitOne
+                        };
+                        err = SecItemCopyMatching((__bridge CFDictionaryRef)query, (CFTypeRef *)&passwordData);
                     }
                     @catch (NSException *e)
                     {
                         NSLog( @"***** exception in %s: %@", __PRETTY_FUNCTION__, e);
+                        if (passwordData) { CFRelease(passwordData); passwordData = NULL; }
+                        err = errSecItemNotFound;
                     }
                 }
-                
+
                 if (err != noErr)
                 {
                     //Try looking it up as a MobileMe account.
                     NSMutableArray *usernameComponents = [[[username componentsSeparatedByString:@"@"] mutableCopy] autorelease];
                     [usernameComponents removeLastObject];
                     username = [usernameComponents componentsJoinedByString:@"@"];
-                    
-                    NSString *serviceName = @"iTools";
-                    
-                    err = SecKeychainFindGenericPassword(/*keychainOrArray*/ NULL,
-                                                         (UInt32)[serviceName length], [serviceName UTF8String],
-                                                         (UInt32)[username length],    [username UTF8String],
-                                                         &passwordLength,              &passwordBytes,
-                                                         /*itemRef*/ NULL);
-                    
+
+                    NSDictionary *genericQuery = @{
+                        (__bridge id)kSecClass:        (__bridge id)kSecClassGenericPassword,
+                        (__bridge id)kSecAttrService:  @"iTools",
+                        (__bridge id)kSecAttrAccount:  username,
+                        (__bridge id)kSecReturnData:   @YES,
+                        (__bridge id)kSecMatchLimit:   (__bridge id)kSecMatchLimitOne
+                    };
+                    err = SecItemCopyMatching((__bridge CFDictionaryRef)genericQuery, (CFTypeRef *)&passwordData);
+
                     if (err != noErr)
                     {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-                        NSLog(@"**** MailMe: Could not get password for SMTP account %@: %i/%s", username, (int)err, GetMacOSStatusCommentString(err));
-#pragma clang diagnostic pop
+                        NSLog(@"**** MailMe: Could not get password for SMTP account %@: %i", username, (int)err);
                     }
                 }
-                
+
                 //If we successfully got either a regular SMTP password or a MobileMe password…
                 if (err == noErr)
                 {
                     //…then let's proceed with sending the message.
-                    NSData *passwordData = nil;
-                    
                     NSMutableDictionary *tempDictionary = [NSMutableDictionary dictionaryWithDictionary: viableAccount];
-                    
-                    if( passwordBytes)
+
+                    if (passwordData)
                     {
-                        passwordData = [NSData dataWithBytesNoCopy:passwordBytes length:passwordLength freeWhenDone:NO];
-                        [tempDictionary setValue: [[[NSString alloc] initWithData: passwordData encoding: NSUTF8StringEncoding] autorelease] forKey: @"Password"];
+                        NSString *password = [[[NSString alloc] initWithData:(__bridge NSData *)passwordData
+                                                                    encoding:NSUTF8StringEncoding] autorelease];
+                        [tempDictionary setValue:password forKey:@"Password"];
+                        CFRelease(passwordData);
+                        passwordData = NULL;
                     }
-                    
+
                     selectedAccount = tempDictionary;
-                    
-                    SecKeychainItemFreeContent(/*attrList*/ NULL, passwordBytes);
                 }
             }
             

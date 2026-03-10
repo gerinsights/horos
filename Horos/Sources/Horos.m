@@ -35,8 +35,6 @@
 //    df.dateFormat = format;
 //    df.formatterBehavior = NSDateFormatterBehavior10_0;
 //    return [df dateFromString:str];
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     return [NSCalendarDate dateWithString:str calendarFormat:format];
 #pragma clang diagnostic pop
 }
@@ -50,8 +48,6 @@
 //    dc.second = second;
 //    dc.timeZone = aTimeZone;
 //    return [dc date];
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     return [NSCalendarDate dateWithYear:year month:month day:day hour:hour minute:minute second:second timeZone:aTimeZone];
 #pragma clang diagnostic pop
 }
@@ -64,8 +60,6 @@
 //    dc.minute = minutes;
 //    dc.second = seconds;
 //    return [[NSCalendar currentCalendar] dateByAddingComponents:dc toDate:date options:0];
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     return [[NSCalendarDate dateWithTimeInterval:0 sinceDate:date] dateByAddingYears:years months:months days:days hours:hours minutes:minutes seconds:seconds];;
 #pragma clang diagnostic pop
 }
@@ -85,8 +79,6 @@
 //    if (hours) *hours = dc.hour;
 //    if (minutes) *minutes = dc.minute;
 //    if (seconds) *seconds = dc.second;
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     return [[NSCalendarDate dateWithTimeInterval:0 sinceDate:date] years:years months:months days:days hours:hours minutes:minutes seconds:seconds sinceDate:[NSCalendarDate dateWithTimeInterval:0 sinceDate:sinceDate]];
 #pragma clang diagnostic pop
 }
@@ -100,8 +92,6 @@
 //    df.formatterBehavior = NSDateFormatterBehavior10_0;
 //    df.dateFormat = format;
 //    return [df stringFromDate:date];
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     return [[NSCalendarDate dateWithTimeInterval:0 sinceDate:date] descriptionWithCalendarFormat:format];
 #pragma clang diagnostic pop
 }

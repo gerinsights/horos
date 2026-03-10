@@ -1066,8 +1066,6 @@ NSInteger studyCompare(ViewerController *v1, ViewerController *v2, void *context
         
         //	[pwindow setContentView: imageView];
         
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
         [im setScalesWhenResized:YES];
 #pragma clang diagnostic pop
 
@@ -13899,8 +13897,6 @@ static NSString * const O2PasteboardTypeEventModifierFlags = @"com.opensource.os
 
 + (NSArray<NSString *> *)PasteboardTypes {
     return @[HorosPasteboardType,
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
              HorosPboardUTI, pasteBoardHoros, pasteBoardOsiriX
 #pragma clang diagnostic pop
              ];
@@ -13908,8 +13904,6 @@ static NSString * const O2PasteboardTypeEventModifierFlags = @"com.opensource.os
 
 + (NSArray<NSString *> *)PluginPasteboardTypes {
     return @[HorosPasteboardTypePlugin,
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
              HorosPluginPboardUTI, pasteBoardHorosPlugin, OsirixPluginPboardUTI, pasteBoardOsiriXPlugin
 #pragma clang diagnostic pop
              ];

@@ -1,0 +1,22 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "LLDB: Launch Horos",
+      "type": "lldb",
+      "request": "launch",
+      "program": "${input:horosExecutablePath}",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "preLaunchTask": "xcodebuild: Horos Debug"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "horosExecutablePath",
+      "type": "promptString",
+      "description": "Path to Horos executable",
+      "default": "${workspaceFolder}/build/Build/Products/Debug/Horos.app/Contents/MacOS/Horos"
+    }
+  ]
+}

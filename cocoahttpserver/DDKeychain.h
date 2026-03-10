@@ -54,7 +54,6 @@
 + (NSString *)applicationTemporaryDirectory;
 + (NSString *)stringForSecExternalFormat:(SecExternalFormat)extFormat;
 + (NSString *)stringForSecExternalItemType:(SecExternalItemType)itemType;
-+ (NSString *)stringForSecKeychainAttrType:(SecKeychainAttrType)attrType;
 + (NSString *)stringForError:(OSStatus)status;
 
 + (NSArray *)KeychainAccessCertificatesList;

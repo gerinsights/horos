@@ -28,7 +28,8 @@ fi
 command -v cmake >/dev/null 2>&1 || { echo >&2 "error: building $TARGET_NAME requires CMake. Please install CMake. Aborting."; exit 1; }
 command -v pkg-config >/dev/null 2>&1 || { echo >&2 "error: building $TARGET_NAME requires pkg-config. Please install pkg-config. Aborting."; exit 1; }
 
-mv "$cmake_dir" "$cmake_dir.tmp"
+rm -rf "$cmake_dir.tmp"
+[ -d "$cmake_dir" ] && mv "$cmake_dir" "$cmake_dir.tmp"
 [ -d "$install_dir" ] && mv "$install_dir" "$install_dir.tmp"
 rm -Rf "$cmake_dir.tmp" "$install_dir.tmp"
 mkdir -p "$cmake_dir";
@@ -44,15 +45,15 @@ args+=(-DGDCM_DOCUMENTATION=OFF)
 args+=(-DGDCM_BUILD_TESTING=OFF)
 args+=(-DGDCM_BUILD_DOCBOOK_MANPAGES=OFF)
 
-args+=(-DGDCM_USE_SYSTEM_OPENJPEG=ON)
-
-args+=(-DCMAKE_IGNORE_PATH="/opt/local/include;/opt/local/lib")
-
 openjpeg_install="$CONFIGURATION_TEMP_DIR/OpenJPEG.build/Install"
 openjpeg_include="$openjpeg_install/include/openjpeg-2.5"
 if [ ! -d "$openjpeg_include" ]; then
     openjpeg_include="$openjpeg_install/include/openjpeg-2.3"
 fi
+# Expose our locally-built OpenJPEG to both pkg-config and cmake find_package
+export PKG_CONFIG_PATH="$openjpeg_install/lib/pkgconfig:$PKG_CONFIG_PATH"
+args+=(-DGDCM_USE_SYSTEM_OPENJPEG=ON)
+args+=(-DOpenJPEG_DIR="$openjpeg_install/lib/cmake/openjpeg-2.5")
 args+=(-DOPENJPEG_LIBRARIES="$openjpeg_install/lib/libopenjp2.a")
 args+=(-DOPENJPEG_INCLUDE_DIRS="$openjpeg_include")
 
@@ -89,6 +90,9 @@ if [ ${#cxxfs[@]} -ne 0 ]; then
     cxxfss="${cxxfs[@]}"
     args+=( -DCMAKE_CXX_FLAGS="$cxxfss" )
 fi
+
+args+=(-DCMAKE_CXX_STANDARD=17)
+args+=(-DCMAKE_CXX_STANDARD_REQUIRED=ON)
 
 cd "$cmake_dir"
 cmake "${args[@]}"
