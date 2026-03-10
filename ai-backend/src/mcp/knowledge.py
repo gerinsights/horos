@@ -55,12 +55,19 @@ HOROS_CAPABILITIES = """
 - **DICOM SEG** (Segmentation objects) — NOT supported (silently ignored on import)
 - **Metal rendering** — all rendering is OpenGL (1,065+ references across 70+ files)
 
-## RTSTRUCT Support (partial):
-- RTSTRUCT files are **recognized and importable** (thumbnail shown, stored in DB)
+## RTSTRUCT Support (FULL — built-in):
+- RTSTRUCT files are importable (thumbnail shown, stored in DB)
 - SOP Class defined in DCM Framework/DCMAbstractSyntaxUID.m (RTStructureSetStorage)
-- **Viewing/rendering is NOT implemented** — no contour overlay on images
-- Plugin approach: parse RTSTRUCT → convert to native Horos ROI objects → overlay on referenced CT/MR
-- Effort: ~3-4 weeks as a plugin (avoids core changes during Metal migration)
+- **Full RTSTRUCT-to-ROI conversion**: DCMPix.m:4939-5327 (390 lines)
+  - Parses ReferencedFrameOfReferenceSequence → finds referenced image series
+  - Extracts StructureSetROISequence → ROI names/numbers
+  - Extracts ROIContourSequence → ContourData (3D coords)
+  - Transforms DICOM patient coords → pixel coords via ImageOrientation/Position
+  - Creates native ROI objects (tCPolygon) with ROIDisplayColor
+  - Optional brush/texture conversion via `RSTRUCTConvertToBrush` user default
+  - Saves ROIs as DICOM SR annotations per-image
+- **User trigger**: right-click "Create ROIs from RTSTRUCT" (BrowserController.m:10900)
+- **Implication**: AI backend RTSTRUCT output renders as interactive ROI overlays — no plugin needed
 
 ## DICOM Networking:
 - C-STORE SCP/SCU: Horos/Sources/DCMTKStoreSCU.mm
