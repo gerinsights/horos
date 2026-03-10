@@ -52,9 +52,15 @@ HOROS_CAPABILITIES = """
   - File: DCM Framework/DCMPresentationState.h
 
 ## What Horos CANNOT display:
-- **DICOM SEG** (Segmentation objects) — NOT supported
-- **DICOM RTSTRUCT** (RT Structure Sets) — NOT supported
+- **DICOM SEG** (Segmentation objects) — NOT supported (silently ignored on import)
 - **Metal rendering** — all rendering is OpenGL (1,065+ references across 70+ files)
+
+## RTSTRUCT Support (partial):
+- RTSTRUCT files are **recognized and importable** (thumbnail shown, stored in DB)
+- SOP Class defined in DCM Framework/DCMAbstractSyntaxUID.m (RTStructureSetStorage)
+- **Viewing/rendering is NOT implemented** — no contour overlay on images
+- Plugin approach: parse RTSTRUCT → convert to native Horos ROI objects → overlay on referenced CT/MR
+- Effort: ~3-4 weeks as a plugin (avoids core changes during Metal migration)
 
 ## DICOM Networking:
 - C-STORE SCP/SCU: Horos/Sources/DCMTKStoreSCU.mm
@@ -82,10 +88,10 @@ DICOM_FLOW = """
 └──────────┘                  └────────────┘                  └──────────────┘
                                      │                                │
                                      │ C-FIND/C-MOVE                  │ C-STORE
-                                     ▼                                │ (SEG + SC)
+                                     ▼                                │ (RTSTRUCT + SC + SEG)
                               ┌────────────┐                          │
                               │  HOROS_M1   │ ◄────────────────────────┘
-                              │  (Mac mini) │   (via PACS_CORE)
+                              │             │   (via PACS_CORE)
                               └────────────┘
 
 AI Pipeline (inside AI_SEGMENT):
@@ -97,7 +103,10 @@ AI Pipeline (inside AI_SEGMENT):
     → Preprocess (resample, normalize, clip)
     → GPU inference (nnUNet/MONAI via ROCm/CUDA/CPU)
     → Post-process (threshold, connected components)
-    → Create DICOM SEG (highdicom) + Secondary Capture (pydicom)
+    → Create triple output:
+      - DICOM RTSTRUCT (rt-utils) — interactive contours in Horos
+      - DICOM Secondary Capture (pydicom) — burned-in overlay, universal
+      - DICOM SEG (highdicom) — voxel-level archive, OHIF/3D Slicer interop
     → C-STORE results back to PACS_CORE
 ```
 """
