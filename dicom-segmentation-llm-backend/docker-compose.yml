@@ -1,0 +1,127 @@
+services:
+  # ── DICOM Node ──
+  orthanc:
+    image: orthancteam/orthanc:24.12.1
+    networks:
+      - internal
+      - dicom
+    ports:
+      - "${DICOM_PORT:-4242}:4242"       # DICOM TLS
+    expose:
+      - "8042"                            # REST API (internal only)
+    volumes:
+      - orthanc-data:/var/lib/orthanc/db
+      - ./config/orthanc.json:/etc/orthanc/orthanc.json:ro
+      - ./config/orthanc-routing.lua:/etc/orthanc/lua/orthanc-routing.lua:ro
+      - ./config/openssl-fips.cnf:/etc/orthanc/openssl-fips.cnf:ro
+      - ./certs:/etc/orthanc/certs:ro
+    environment:
+      - ORTHANC__NAME=AI_SEGMENT
+      - OPENSSL_CONF=/etc/orthanc/openssl-fips.cnf
+    healthcheck:
+      test: ["CMD", "curl", "-fsk", "http://localhost:8042/system"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+
+  # ── AI Segmentation Service ──
+  ai-service:
+    build:
+      context: .
+      args:
+        GPU_BACKEND: ${GPU_BACKEND:-cpu}
+    networks:
+      - internal
+    expose:
+      - "8000"                            # FastAPI (internal only)
+      - "3001"                            # MCP SSE (internal only)
+    ports:
+      - "${MCP_PORT:-3001}:3001"          # MCP SSE (host access for Claude Code)
+    volumes:
+      - ./models:/app/models:ro
+      - ./config:/app/config:ro
+      - ./certs:/app/certs:ro
+      - ai-workdir:/app/workdir
+    depends_on:
+      orthanc:
+        condition: service_healthy
+    environment:
+      - ORTHANC_URL=http://orthanc:8042
+      - OLLAMA_URL=http://ollama:11434
+      - PACS_AE=${PACS_AE:-PACS}
+      - PACS_HOST=${PACS_HOST:-localhost}
+      - PACS_PORT=${PACS_PORT:-4242}
+      - CONFIG_PATH=/app/config/settings.yaml
+      - OPENSSL_CONF=/app/config/openssl-fips.cnf
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/health').raise_for_status()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+
+  # ── LLM Service ──
+  ollama:
+    image: ollama/ollama:latest
+    networks:
+      - internal
+    expose:
+      - "11434"                           # Ollama API (internal only)
+    volumes:
+      - ollama-models:/root/.ollama
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+
+  # ── Reverse Proxy (TLS termination) ──
+  gateway:
+    image: caddy:2-alpine
+    networks:
+      - internal
+      - external
+    ports:
+      - "${HTTPS_PORT:-8443}:443"         # HTTPS for REST APIs
+    volumes:
+      - ./config/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./certs:/etc/caddy/certs:ro
+      - caddy-data:/data
+    depends_on:
+      - ai-service
+      - orthanc
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+    restart: unless-stopped
+
+networks:
+  internal:
+    driver: bridge
+    internal: true          # No external access — service-to-service only
+  dicom:
+    driver: bridge          # DICOM port exposed to scanner/PACS network
+  external:
+    driver: bridge          # HTTPS gateway
+
+volumes:
+  orthanc-data:
+  ollama-models:
+  ai-workdir:
+  caddy-data:
