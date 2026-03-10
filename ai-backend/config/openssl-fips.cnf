@@ -1,0 +1,37 @@
+# OpenSSL FIPS 140-3 configuration
+# Activates the FIPS provider and restricts to FIPS-approved algorithms.
+#
+# The fipsmodule.cnf is generated at image build time by `openssl fipsinstall`.
+# It contains the HMAC of the FIPS provider .so for integrity verification.
+
+openssl_conf = openssl_init
+
+.include /etc/ssl/fipsmodule.cnf
+
+[openssl_init]
+providers = provider_sect
+alg_section = algorithm_sect
+ssl_conf = ssl_sect
+
+[provider_sect]
+fips = fips_sect
+base = base_sect
+
+[fips_sect]
+activate = 1
+
+[base_sect]
+activate = 1
+
+[algorithm_sect]
+default_properties = fips=yes
+
+# TLS defaults: FIPS-approved ciphers only
+[ssl_sect]
+system_default = system_default_sect
+
+[system_default_sect]
+MinProtocol = TLSv1.2
+CipherSuites = TLS_AES_256_GCM_SHA384:TLS_AES_128_GCM_SHA256
+CipherString = ECDHE+AESGCM:DHE+AESGCM
+Curves = P-384:P-256
